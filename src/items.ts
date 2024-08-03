@@ -28,3 +28,5 @@ export const getItems = async (): Promise<ItemSchema[]> => {
     resolve(items)
   })
 }
+
+export const getItemsByCategory = async (category: string) => (await getItems()).filter(item => item.type === category)
