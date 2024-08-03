@@ -7,12 +7,13 @@ import { Character } from './character'
 const actions = async (name: string) => {
   const perso = new Character(name)
 
-  const cooked_gudgeon = await getItemsByCode('cooked_gudgeon')
-  if (!cooked_gudgeon) {
+  const copper_ring = await getItemsByCode('copper_ring')
+  if (!copper_ring) {
     throw new Error(`Le bouclier en bois n'as pas été trouvé !`)
   }
   
-  await perso.craft(cooked_gudgeon)
+  await perso.craft(copper_ring)
+  await perso.equip({code: 'copper_ring', slot: 'ring2'})
 }
 
 actions('Nendar')
