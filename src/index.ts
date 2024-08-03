@@ -1,13 +1,18 @@
 import * as dotenv from 'dotenv'
 dotenv.config()
 
-import { move, fight, gathering, unequip, craft, equip } from './actions'
-import { getInventory } from './getters'
-import { getItems } from './items'
+import { getItemsByCode } from './items'
+import { Character } from './character'
 
 const actions = async (name: string) => {
-  const items = await getItems()
-  console.log(`${items.length} récupérés`)
+  const perso = new Character(name)
+
+  const cooked_gudgeon = await getItemsByCode('cooked_gudgeon')
+  if (!cooked_gudgeon) {
+    throw new Error(`Le bouclier en bois n'as pas été trouvé !`)
+  }
+  
+  await perso.craft(cooked_gudgeon)
 }
 
 actions('Nendar')

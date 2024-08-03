@@ -20,4 +20,3 @@ export const gestionError = (error: Response): string => {
       return `Probleme non définit : ${error.status} => ${error.json()}`
   }
 }
-
