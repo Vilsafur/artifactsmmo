@@ -1,18 +1,7 @@
-import { resolve } from 'path'
 import { CharacterFightResponseSchema, CharacterMovementResponseSchema, CraftingSchema, DestinationSchema, EquipSchema, EquipmentResponseSchema, SkillResponseSchema, UnequipSchema } from './ApiArtifacts'
 
-import { client } from './api'
+import { client, gestionError } from './api'
 import { delay } from './utils'
-
-const gestionError = (error: Response): string => {
-  switch (error.status) {
-    case 490:
-      return `Le personnage est déjà sur la case`
-  
-    default:
-      return `Probleme non définit : ${error.status} => ${error.json()}`
-  }
-}
 
 export const move = (name: string, data: DestinationSchema): Promise<CharacterMovementResponseSchema> => {
   return new Promise(async (resolve, reject) => {

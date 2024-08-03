@@ -11,3 +11,13 @@ export const client = new Api({
   }
 })
 
+export const gestionError = (error: Response): string => {
+  switch (error.status) {
+    case 490:
+      return `Le personnage est déjà sur la case`
+  
+    default:
+      return `Probleme non définit : ${error.status} => ${error.json()}`
+  }
+}
+
