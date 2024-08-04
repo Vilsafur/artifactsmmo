@@ -1,5 +1,6 @@
 import { ItemSchema, ResourceSchema } from './ApiArtifacts'
 import { client } from './api'
+import { logItem } from './logger';
 
 const items: ItemSchema[] = [];
 const resources: ResourceSchema[] = [];
@@ -7,17 +8,17 @@ const resources: ResourceSchema[] = [];
 export const getItems = async (): Promise<ItemSchema[]> => {
   return new Promise(async (resolve, reject) => {
     if (items.length === 0) {
-      console.log(`Début de la récupération des items`)
+      logItem(`Début de la récupération des items`)
       /** @var data ItemSchema[] */
       let { data, page, pages } = await client.items.getAllItemsItemsGet().then(v => v.json())
-      console.log(`Page ${page} / ${pages}`)
+      logItem(`Page ${page} / ${pages}`)
       
       for (const item of data) {
         items.push(item)
       }
 
       for (page++; page <= pages; page++) {
-        console.log(`Page ${page} / ${pages}`)
+        logItem(`Page ${page} / ${pages}`)
         let { data } = await client.items.getAllItemsItemsGet({ page }).then(v => v.json())
   
         for (const item of data) {
@@ -39,17 +40,17 @@ export const getItemsByCode = async (code: string): Promise<ItemSchema | undefin
 export const getResources = async (): Promise<ResourceSchema[]> => {
   return new Promise(async (resolve, reject) => {
     if (resources.length === 0) {
-      console.log(`Début de la récupération des resources`)
+      logItem(`Début de la récupération des resources`)
       /** @var data resourceschema[] */
       let { data, page, pages } = await client.resources.getAllResourcesResourcesGet().then(v => v.json())
-      console.log(`Page ${page} / ${pages}`)
+      logItem(`Page ${page} / ${pages}`)
       
       for (const item of data) {
         resources.push(item)
       }
 
       for (page++; page <= pages; page++) {
-        console.log(`Page ${page} / ${pages}`)
+        logItem(`Page ${page} / ${pages}`)
         let { data } = await client.resources.getAllResourcesResourcesGet({ page }).then(v => v.json())
   
         for (const item of data) {

@@ -1,14 +1,26 @@
 import { client } from './api'
 import { CharacterFightResponseSchema, CharacterMovementResponseSchema, CharacterSchema, DestinationSchema, EquipSchema, InventorySlot, ItemSchema, UnequipSchema } from './ApiArtifacts';
+import { logCharacter } from './logger';
 import { getItemsByCode } from './items'
 import { getItemPosition, getWorkshopsPositionByCode } from './map';
 import { delay } from './utils';
+import { Chalk } from 'chalk';
 
 export class Character {
   private name
+  private color: Chalk
 
-  constructor(name: string) {
+  constructor(name: string, color: Chalk) {
     this.name = name
+    this.color = color
+  }
+
+  getName(): String {
+    return this.name
+  }
+
+  getColor(): Chalk {
+    return this.color
   }
 
   /**
@@ -61,30 +73,30 @@ export class Character {
   async retrieveOrCraft(item: ItemSchema, quantity: number): Promise<void> {
     const inInventory = (await this.getInfos()).inventory?.find(i => i.code === item.code)?.quantity ?? 0
     if (inInventory === quantity) {
-      console.log(`L'objet ${item.name} est déjà dans l'inventaire`)
+      logCharacter(this, `L'objet ${item.name} est déjà dans l'inventaire`)
       return
     }
 
     let toRetrieve = quantity - inInventory
 
     while (toRetrieve > 0) {
-      console.log(`${toRetrieve} objets à récupérer`)
+      logCharacter(this, `${toRetrieve} objets à récupérer`)
       for (let index = 0; index < toRetrieve; index++) {
         if (item.craft) {
-          console.log(`L'objet ${item.name} doit être fabriqué`)
+          logCharacter(this, `L'objet ${item.name} doit être fabriqué`)
           await this.craft(item)
         } else {
-          console.log(`L'objet ${item.name} doit être récupéré`)
+          logCharacter(this, `L'objet ${item.name} doit être récupéré`)
           const position = await getItemPosition(item, await this.getInfos())
-          console.log(`Déplacement vers l'objet ${item.name}`)
+          logCharacter(this, `Déplacement vers l'objet ${item.name}`)
           await this.move(position)
-          console.log(`Récupération de l'objet ${item.name}`)
+          logCharacter(this, `Récupération de l'objet ${item.name}`)
           await this.gathering()
         }
       }
       const inInventory = (await this.getInfos()).inventory?.find(i => i.code === item.code)?.quantity ?? 0
       if (inInventory === quantity) {
-        console.log(`L'objet ${item.name} est déjà dans l'inventaire`)
+        logCharacter(this, `L'objet ${item.name} est déjà dans l'inventaire`)
         return
       }
   
@@ -110,7 +122,7 @@ export class Character {
       throw new Error(`${this.name} n'a pas les compétences de ${item.craft.skill} (${jobLevel} / ${item.craft.level}) pour fabriquer l'objet ${item.name}`);
     }
 
-    console.log(`Début de la fabrication de l'objet : ${item.name}`)
+    logCharacter(this, `Début de la fabrication de l'objet : ${item.name}`)
 
     const itemsNeeded = item.craft.items
 
@@ -130,7 +142,7 @@ export class Character {
       throw new Error(`L'atelier ${item.craft.skill} n'a pas été trouvé`)
     }
 
-    console.log(`Déplacement vers l'atelier ${workshop.content?.code}`)
+    logCharacter(this, `Déplacement vers l'atelier ${workshop.content?.code}`)
     await this.move(workshop)
 
     const { data } = await client.my.actionCraftingMyNameActionCraftingPost(this.name, {code: item.code})

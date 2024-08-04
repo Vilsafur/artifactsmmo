@@ -1,27 +1,28 @@
 import { client } from './api'
 import { CharacterSchema, ItemSchema, MapSchema } from './ApiArtifacts'
-import { getItemFromResource, getItemsByName, getResourceForItem } from './items';
+import { logMap } from './logger';
+import { getResourceForItem } from './items';
 
 const map: MapSchema[] = [];
 
 export const getMap = async (): Promise<MapSchema[]> => {
   if (map.length === 0) {
-    console.log(`Début de la récupération de la carte`)
+    logMap(`Début de la récupération de la carte`)
     /** @var data ItemSchema[] */
     let { data, page, pages } = await client.maps.getAllMapsMapsGet().then(v => v.json())
-    console.log(`Page ${page} / ${pages}`)
+    logMap(`Page ${page} / ${pages}`)
     
     for (const item of data) {
       map.push(item)
     }
 
     for (page++; page <= pages; page++) {
-      console.log(`Page ${page} / ${pages}`)
+      logMap(`Page ${page} / ${pages}`)
       let { data } = await client.maps.getAllMapsMapsGet({ page }).then(v => v.json())
 
       for (const item of data) {
         map.push(item)
-      }      
+      }
     }
   }
 
