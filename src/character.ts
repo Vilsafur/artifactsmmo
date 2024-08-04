@@ -186,6 +186,14 @@ export class Character {
   }
 
   async equip (data: EquipSchema): Promise<void> {
+    if ((await this.getInventory())?.filter(v => v.code === data.code).length === 0) {
+      const item = await getItemsByCode(data.code)
+      if (!item) {
+        throw new Error(`Erreur dans la récupération de l'objet ${data.code}`);
+      }
+      this.craft(item)
+    }
+
     await client.my.actionEquipItemMyNameActionEquipPost(this.name, data)
       .then(v => v.json())
       .then(async response => {
