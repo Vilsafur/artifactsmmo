@@ -1,5 +1,5 @@
 import { client } from './api'
-import { CharacterMovementResponseSchema, CharacterSchema, DestinationSchema, EquipSchema, ItemSchema, UnequipSchema } from './ApiArtifacts';
+import { CharacterFightResponseSchema, CharacterMovementResponseSchema, CharacterSchema, DestinationSchema, EquipSchema, InventorySlot, ItemSchema, UnequipSchema } from './ApiArtifacts';
 import { getItemsByCode } from './items'
 import { getItemPosition, getWorkshopsPositionByCode } from './map';
 import { delay } from './utils';
@@ -18,6 +18,10 @@ export class Character {
    */
   async getInfos(): Promise<CharacterSchema> {
     return (await client.characters.getCharacterCharactersNameGet(this.name).then(v => v.json())).data
+  }
+
+  async getInventory(): Promise<InventorySlot[] | undefined> {
+    return (await this.getInfos()).inventory
   }
 
   /**
@@ -191,5 +195,18 @@ export class Character {
       .catch((e: Response) => {
         throw new Error(`Impossible de déséquiper l'objet à l'emplacement ${data.slot}, code ${e.status}`)
       })
+  }
+
+  /**
+   * Combat le monstre sur la case
+   */
+  async fight (): Promise<void> {
+    await client.my.actionFightMyNameActionFightPost(this.name)
+      .then(v => v.json())
+      .then(async (response: CharacterFightResponseSchema) => {
+        const cooldown = response.data.cooldown.total_seconds;
+        await delay(cooldown * 1000);
+      })
+      .catch((e: Response) => {throw new Error (`Erreur lors du combat, code ${e.status}`)})
   }
 }
