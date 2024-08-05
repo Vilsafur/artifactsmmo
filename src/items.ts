@@ -8,7 +8,7 @@ const resources: ResourceSchema[] = [];
 export const getItems = async (): Promise<ItemSchema[]> => {
   return new Promise(async (resolve, reject) => {
     if (items.length === 0) {
-      logItem(`Début de la récupération des items`)
+      logItem(`Début de la récupération des items`, 'info')
       /** @var data ItemSchema[] */
       let { data, page, pages } = await client.items.getAllItemsItemsGet().then(v => v.json())
       logItem(`Page ${page} / ${pages}`)
@@ -40,7 +40,7 @@ export const getItemsByCode = async (code: string): Promise<ItemSchema | undefin
 export const getResources = async (): Promise<ResourceSchema[]> => {
   return new Promise(async (resolve, reject) => {
     if (resources.length === 0) {
-      logItem(`Début de la récupération des resources`)
+      logItem(`Début de la récupération des resources`, 'info')
       /** @var data resourceschema[] */
       let { data, page, pages } = await client.resources.getAllResourcesResourcesGet().then(v => v.json())
       logItem(`Page ${page} / ${pages}`)

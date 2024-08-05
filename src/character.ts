@@ -38,7 +38,11 @@ export class Character {
     while(this.tasks.length > 0) {
       const currentTask = this.tasks.shift()
       if (currentTask) {
-        await currentTask()
+        try {
+          await currentTask()
+        } catch (error) {
+          logCharacter(this, `Il y a eu un soucis lors de l'exécution de la tâche`, 'error')
+        }
       }
     }
     this.isExecuting = false
@@ -92,37 +96,47 @@ export class Character {
    * @returns 
    */
   async retrieveOrCraft(item: ItemSchema, quantity: number): Promise<void> {
-    const inInventory = (await this.getInfos()).inventory?.find(i => i.code === item.code)?.quantity ?? 0
-    if (inInventory === quantity) {
-      logCharacter(this, `L'objet ${item.name} est déjà dans l'inventaire`)
-      return
-    }
-
-    let toRetrieve = quantity - inInventory
-
-    while (toRetrieve > 0) {
-      logCharacter(this, `${toRetrieve} objets à récupérer`)
-      for (let index = 0; index < toRetrieve; index++) {
-        if (item.craft) {
-          logCharacter(this, `L'objet ${item.name} doit être fabriqué`)
-          await this.craft(item)
-        } else {
-          logCharacter(this, `L'objet ${item.name} doit être récupéré`)
-          const position = await getItemPosition(item, await this.getInfos())
-          logCharacter(this, `Déplacement vers l'objet ${item.name}`)
-          await this.move(position)
-          logCharacter(this, `Récupération de l'objet ${item.name}`)
-          await this.gathering()
-        }
-      }
+    return new Promise(async (resolve, reject) => {
       const inInventory = (await this.getInfos()).inventory?.find(i => i.code === item.code)?.quantity ?? 0
       if (inInventory === quantity) {
         logCharacter(this, `L'objet ${item.name} est déjà dans l'inventaire`)
-        return
+        return reject()
       }
   
-      toRetrieve = quantity - inInventory
-    }
+      let toRetrieve = quantity - inInventory
+  
+      while (toRetrieve > 0) {
+        logCharacter(this, `${toRetrieve} objets à récupérer`)
+        for (let index = 0; index < toRetrieve; index++) {
+          if (item.craft) {
+            logCharacter(this, `L'objet ${item.name} doit être fabriqué`)
+            try {
+              await this.craft(item)
+            } catch (error) {
+              return reject()              
+            }
+          } else {
+            logCharacter(this, `L'objet ${item.name} doit être récupéré`)
+            const position = await getItemPosition(item, await this.getInfos())
+            if (!position) {
+              return
+            }
+            logCharacter(this, `Déplacement vers l'objet ${item.name}`)
+            await this.move(position)
+            logCharacter(this, `Récupération de l'objet ${item.name}`)
+            await this.gathering()
+          }
+        }
+        const inInventory = (await this.getInfos()).inventory?.find(i => i.code === item.code)?.quantity ?? 0
+        if (inInventory === quantity) {
+          logCharacter(this, `L'objet ${item.name} est déjà dans l'inventaire`, 'info')
+          return resolve()
+        }
+    
+        toRetrieve = quantity - inInventory
+      }
+      resolve()
+    })
   }
 
   /**
@@ -132,48 +146,57 @@ export class Character {
    * @param item L'objet à fabriquer
    */
   async craft(item: ItemSchema): Promise<void> {
+    return new Promise(async (resolve, reject) => {
 
-    if (!item.craft || !item.craft.skill) {
-      throw new Error(`L'objet ${item.name} n'est pas fabricable`);
-    }
-
-    const jobLevel = (await this.getJobLevels())[item.craft.skill]
-
-    if (item.craft.level && item.craft.level > jobLevel) {
-      throw new Error(`${this.name} n'a pas les compétences de ${item.craft.skill} (${jobLevel} / ${item.craft.level}) pour fabriquer l'objet ${item.name}`);
-    }
-
-    logCharacter(this, `Début de la fabrication de l'objet : ${item.name}`)
-
-    const itemsNeeded = item.craft.items
-
-    if (itemsNeeded) {
-      for (const itemNeeded of itemsNeeded) {
-        const item = await getItemsByCode(itemNeeded.code)
-        if (!item) {
-          throw new Error(`Erreur lors de la récupération de l'objet ${itemNeeded.code}`)
-        }
-
-        await this.retrieveOrCraft(item, itemNeeded.quantity)
+      if (!item.craft || !item.craft.skill) {
+        logCharacter(this, `L'objet ${item.name} n'est pas fabricable`, 'error');
+        return reject()
       }
-    }
-
-    const workshop = await getWorkshopsPositionByCode(item.craft.skill)
-    if (!workshop) {
-      throw new Error(`L'atelier ${item.craft.skill} n'a pas été trouvé`)
-    }
-
-    logCharacter(this, `Déplacement vers l'atelier ${workshop.content?.code}`)
-    await this.move(workshop)
-
-    const { data } = await client.my.actionCraftingMyNameActionCraftingPost(this.name, {code: item.code})
-      .then(v => v.json())
-      .catch((e: Response) => {throw new Error(`Erreur lors de la fabrication de l'objet, code : ${e.status}`)}
-      )
-
-
-    const cooldown = data.cooldown.total_seconds;
-    await delay(cooldown * 1000);
+  
+      const jobLevel = (await this.getJobLevels())[item.craft.skill]
+  
+      if (item.craft.level && item.craft.level > jobLevel) {
+        logCharacter(this, `Manque de compétences de ${item.craft.skill} pour fabriquer l'objet ${item.name} (${jobLevel} / ${item.craft.level})`, 'error');
+        return reject()
+      }
+  
+      logCharacter(this, `Début de la fabrication de l'objet : ${item.name}`, 'info')
+  
+      const itemsNeeded = item.craft.items
+  
+      if (itemsNeeded) {
+        for (const itemNeeded of itemsNeeded) {
+          const item = await getItemsByCode(itemNeeded.code)
+          if (!item) {
+            logCharacter(this, `Erreur lors de la récupération de l'objet ${itemNeeded.code}`, 'error')
+            return reject()
+          }
+  
+          await this.retrieveOrCraft(item, itemNeeded.quantity).catch(() => reject())
+        }
+      }
+  
+      const workshop = await getWorkshopsPositionByCode(item.craft.skill)
+      if (!workshop) {
+        logCharacter(this, `L'atelier ${item.craft.skill} n'a pas été trouvé`, 'error')
+        return reject()
+      }
+  
+      logCharacter(this, `Déplacement vers l'atelier ${workshop.content?.code}`)
+      await this.move(workshop)
+  
+      const { data } = await client.my.actionCraftingMyNameActionCraftingPost(this.name, {code: item.code})
+        .then(v => v.json())
+        .catch((e: Response) => {
+          logCharacter(this, `Erreur lors de la fabrication de l'objet, code : ${e.status}`, 'error')
+          return reject()
+        })
+  
+  
+      const cooldown = data.cooldown.total_seconds;
+      await delay(cooldown * 1000);
+      resolve()
+    })
   }
 
   /**
@@ -182,17 +205,21 @@ export class Character {
    * @param position La position de destination
    */
   async move(position: DestinationSchema): Promise<void> {
-    await client.my.actionMoveMyNameActionMovePost(this.name, position)
-      .then(v => v.json())
-      .then(async response => {
-        const cooldown = response.data.cooldown.total_seconds;
-        await delay(cooldown * 1000);
-      })
-      .catch((e: Response) => {
-        if (e.status !== 490) {
-          throw new Error(`Erreur dans le déplacement, code de retour : ${e.status}`);          
-        }
-      })
+    return new Promise(async (resolve, reject) => {
+      await client.my.actionMoveMyNameActionMovePost(this.name, position)
+        .then(v => v.json())
+        .then(async response => {
+          const cooldown = response.data.cooldown.total_seconds;
+          await delay(cooldown * 1000);
+        })
+        .catch((e: Response) => {
+          if (e.status !== 490) {
+            logCharacter(this, `Erreur dans le déplacement, code de retour : ${e.status}`, 'error');
+            return reject()
+          }
+        })
+        resolve()
+    })
   }
 
   /**
@@ -207,14 +234,6 @@ export class Character {
   }
 
   async equip (data: EquipSchema): Promise<void> {
-    if ((await this.getInventory())?.filter(v => v.code === data.code).length === 0) {
-      const item = await getItemsByCode(data.code)
-      if (!item) {
-        throw new Error(`Erreur dans la récupération de l'objet ${data.code}`);
-      }
-      this.craft(item)
-    }
-
     await client.my.actionEquipItemMyNameActionEquipPost(this.name, data)
       .then(v => v.json())
       .then(async response => {
@@ -222,7 +241,8 @@ export class Character {
         await delay(cooldown * 1000);
       })
       .catch((e: Response) => {
-        throw new Error(`Erreur lors de l'équipement de l'objet ${data.code}, code : ${e.status}`)
+        logCharacter(this, `Erreur lors de l'équipement de l'objet ${data.code}, code : ${e.status}`, 'error')
+        return
       })
   }
 
@@ -234,7 +254,8 @@ export class Character {
         await delay(cooldown * 1000);
       })
       .catch((e: Response) => {
-        throw new Error(`Impossible de déséquiper l'objet à l'emplacement ${data.slot}, code ${e.status}`)
+        logCharacter(this, `Impossible de déséquiper l'objet à l'emplacement ${data.slot}, code ${e.status}`, 'error')
+        return
       })
   }
 
@@ -248,6 +269,9 @@ export class Character {
         const cooldown = response.data.cooldown.total_seconds;
         await delay(cooldown * 1000);
       })
-      .catch((e: Response) => {throw new Error (`Erreur lors du combat, code ${e.status}`)})
+      .catch((e: Response) => {
+        logCharacter(this, `Erreur lors du combat, code ${e.status}`, 'error')
+        return
+      })
   }
 }
