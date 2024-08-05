@@ -1,5 +1,5 @@
 import { client } from './api'
-import { CharacterFightResponseSchema, CharacterMovementResponseSchema, CharacterSchema, DestinationSchema, EquipSchema, InventorySlot, ItemSchema, UnequipSchema } from './ApiArtifacts';
+import { CharacterFightResponseSchema, CharacterSchema, DestinationSchema, EquipSchema, InventorySlot, ItemSchema, UnequipSchema } from './ApiArtifacts';
 import { logCharacter } from './logger';
 import { getItemsByCode } from './items'
 import { getItemPosition, getWorkshopsPositionByCode } from './map';
