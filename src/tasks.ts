@@ -2,6 +2,8 @@ import { Character } from "./character";
 import { getItemsByCode } from "./items";
 import { logCharacter } from "./logger";
 
+export type Task = () => Promise<void>
+
 export const createStarterSet = async (personnage: Character, equip: boolean = false) => {
     const items : {[key: string]: {
         name: string, 

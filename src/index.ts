@@ -8,7 +8,8 @@ import { createStarterSet } from './tasks'
 const actions = async (name: string) => {
   const perso = new Character(name, playerColors[0])
 
-  createStarterSet(perso, true)
+  perso.addTask(() => createStarterSet(perso, true))
+  
 }
 
 actions('Nendar')

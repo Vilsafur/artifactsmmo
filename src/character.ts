@@ -5,10 +5,13 @@ import { getItemsByCode } from './items'
 import { getItemPosition, getWorkshopsPositionByCode } from './map';
 import { delay } from './utils';
 import { Chalk } from 'chalk';
+import { Task } from './tasks';
 
 export class Character {
   private name
   private color: Chalk
+  private tasks: Task[] = []
+  private isExecuting: boolean = false
 
   constructor(name: string, color: Chalk) {
     this.name = name
@@ -21,6 +24,24 @@ export class Character {
 
   getColor(): Chalk {
     return this.color
+  }
+
+  addTask(task: Task) {
+    this.tasks.push(task)
+    if(!this.isExecuting) {
+      this.executeTasks()
+    }
+  }
+
+  private async executeTasks(): Promise<void> {
+    this.isExecuting = true
+    while(this.tasks.length > 0) {
+      const currentTask = this.tasks.shift()
+      if (currentTask) {
+        await currentTask()
+      }
+    }
+    this.isExecuting = false
   }
 
   /**
