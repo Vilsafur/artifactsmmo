@@ -5,6 +5,11 @@ import { getResourceForItem } from './items';
 
 const map: MapSchema[] = [];
 
+/**
+ * Récupère la carte, va la rechercher si besoin
+ *
+ * @returns La carte
+ */
 export const getMap = async (): Promise<MapSchema[]> => {
   if (map.length === 0) {
     logMap(`Début de la récupération de la carte`, 'info')
@@ -29,6 +34,13 @@ export const getMap = async (): Promise<MapSchema[]> => {
   return map
 }
 
+/**
+ * Récupère l'emplacement le plus proche du personnage contenant l'objet souhaité
+ *
+ * @param item L'objet à rechercher
+ * @param character Le personnage qui doit récupérer l'objet
+ * @returns L'encroit de la carte contenant l'objet
+ */
 export const getItemPosition = async (item: ItemSchema, character: CharacterSchema): Promise<MapSchema | undefined> => {
   return new Promise(async (resolve, reject) => {
     const resource = await getResourceForItem(item)
@@ -58,8 +70,19 @@ export const getItemPosition = async (item: ItemSchema, character: CharacterSche
   })
 }
 
+/**
+ * Retourne l'emplacements des ateliers
+ *
+ * @returns La position des ateliers
+ */
 export const getWorkshopsPosition = async () => (await getMap()).filter(m => m.content?.type == 'workshop')
 
+/**
+ * Retourne l'emplacement du workshop
+ *
+ * @param code Le code du workshop
+ * @returns La position du workshop
+ */
 export const getWorkshopsPositionByCode = async (code: string) => (await getMap()).filter(m => m.content?.type == 'workshop').find(m => m.content?.code === code)
 
 const distance = (x1: number, y1: number, x2: number, y2: number) => {

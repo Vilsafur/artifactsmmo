@@ -5,6 +5,13 @@ import { Slot } from "./types";
 
 export type Task = () => Promise<void>
 
+/**
+ * Créer le set de départ comprenant les objets en cuivre + le bouclier en bois
+ *
+ * @param personnage Le personnage devant créer le set
+ * @param equip Le set doit-il être équipé par le personnage ?
+ * @returns void
+ */
 export const createStarterSet = async (personnage: Character, equip: boolean = false): Promise<void> => {
   return new Promise(async (resolve, reject) => {
 

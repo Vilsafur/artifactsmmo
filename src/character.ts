@@ -18,14 +18,29 @@ export class Character {
     this.color = color
   }
 
+  /**
+   * Retourne le nom du personnage
+   *
+   * @returns La nom du personnage
+   */
   getName(): String {
     return this.name
   }
 
+  /**
+   * Retourne la couleur de log du personnage
+   *
+   * @returns La couleur de log
+   */
   getColor(): Chalk {
     return this.color
   }
 
+  /**
+   * Ajoute une tâche à la liste de tâche à effectuer du personnage
+   *
+   * @param task La tâche à effectuer
+   */
   addTask(task: Task) {
     this.tasks.push(task)
     if(!this.isExecuting) {
@@ -57,6 +72,11 @@ export class Character {
     return (await client.characters.getCharacterCharactersNameGet(this.name).then(v => v.json())).data
   }
 
+  /**
+   * Retourne l'inventaire du personnage
+   *
+   * @returns L'inventaire du personnage
+   */
   async getInventory(): Promise<InventorySlot[] | undefined> {
     return (await this.getInfos()).inventory
   }
@@ -233,6 +253,11 @@ export class Character {
       await delay(cooldown * 1000);
   }
 
+  /**
+   * Equipe un objet dans l'emplacement souhaité
+   * 
+   * @param data L'objet et l'emplacement à équiper
+   */
   async equip (data: EquipSchema): Promise<void> {
     await client.my.actionEquipItemMyNameActionEquipPost(this.name, data)
       .then(v => v.json())
@@ -246,6 +271,11 @@ export class Character {
       })
   }
 
+  /**
+   * Déséquipe un objet
+   *
+   * @param data L'emplacement de l'objet à déséquiper
+   */
   async unequip (data: UnequipSchema): Promise<void> {
     await client.my.actionUnequipItemMyNameActionUnequipPost(this.name, data)
       .then(v => v.json())
