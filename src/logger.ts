@@ -15,8 +15,16 @@ const log = (color: Chalk, message: string, level: Level): void => {
     return
   }
   let logMessage = `[${getCurrentTime()}] ${message}`
-  if (level === 'error') {
-    logMessage = chalk.bold(logMessage)
+  switch (level) {
+    case 'error':
+      logMessage = chalk.bold(logMessage)
+      break;
+    case 'debug':
+      logMessage = chalk.italic(logMessage)
+      break;
+  
+    default:
+      break;
   }
   console.log(color(logMessage))
 }
@@ -50,6 +58,16 @@ export const logMap = (message: string, level: Level = 'debug'): void => {
  */
 export const logItem = (message: string, level: Level = 'debug'): void => {
   log(chalk.rgb(192, 192, 192), `Item : ${message}`, level)
+}
+
+/**
+ * Ecrit un message de log pour un objet
+ *
+ * @param message Le message à écrire
+ * @param level Le niveau du log
+ */
+export const logTeam = (message: string, level: Level = 'debug'): void => {
+  log(chalk.rgb(255, 215, 0), `Team : ${message}`, level)
 }
 
 /**

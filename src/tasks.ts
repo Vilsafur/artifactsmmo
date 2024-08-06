@@ -1,7 +1,8 @@
+import { ItemSchema } from "./ApiArtifacts";
 import { Character } from "./character";
 import { getItemsByCode } from "./items";
 import { logCharacter, logItem } from "./logger";
-import { Slot } from "./types";
+import { Set, Slot } from "./types";
 
 export type Task = () => Promise<void>
 
@@ -12,19 +13,10 @@ export type Task = () => Promise<void>
  * @param equip Le set doit-il être équipé par le personnage ?
  * @returns void
  */
-export const createStarterSet = async (personnage: Character, equip: boolean = false): Promise<void> => {
+export const createStarterSet = async (personnage: Character, depositToBank: boolean = false): Promise<void> => {
   return new Promise(async (resolve, reject) => {
 
-    const items: {
-      [key: string]: {
-        name: string,
-        slots: Slot[]
-      }
-    } = {
-      copper_dagger: {
-        name: 'Copper Dagger',
-        slots: ['weapon']
-      },
+    const items: Set = {
       copper_boots: {
         name: 'Copper Boots',
         slots: ['boots']
@@ -51,6 +43,23 @@ export const createStarterSet = async (personnage: Character, equip: boolean = f
       },
     }
 
+    await craftItems(personnage, items)
+    if (depositToBank) {
+      await depositItemsToBank(personnage, items)
+    }
+    return resolve()
+  })
+}
+
+export const farm = async(personnage: Character, item: ItemSchema, quantity: number, depositToBank: boolean = false) => {
+  await personnage.retrieveOrCraft(item, quantity)
+  if (depositToBank) {
+    personnage.depositItemToBank(item, quantity)
+  }
+}
+
+const craftItems = (personnage: Character, items: Set) => {
+  return new Promise(async (resolve, reject) => {
     for (const code in items) {
       if (Object.prototype.hasOwnProperty.call(items, code)) {
         const { name, slots } = items[code];
@@ -61,25 +70,36 @@ export const createStarterSet = async (personnage: Character, equip: boolean = f
         }
 
         for (const slot of slots) {
-          if (equip && (await personnage.getInfos())[`${slot}_slot`] == item.code) {
-            logCharacter(personnage, `L'objet ${name} est déjà équipé`)
-            continue
-          }
-
           try {
             await personnage.retrieveOrCraft(item, 1)
-            if (equip) {
-              if ((await personnage.getInfos())[`${slot}_slot`] != '') {
-                await personnage.unequip({ slot })
-              }
-              await personnage.equip({ code, slot })
-            }
           } catch (error) {
-            continue            
+            continue
           }
         }
       }
     }
-    resolve()
+  })
+}
+
+const depositItemsToBank = (personnage: Character, items: Set) => {
+  return new Promise(async (resolve, reject) => {
+    for (const code in items) {
+      if (Object.prototype.hasOwnProperty.call(items, code)) {
+        const { name, slots } = items[code];
+        const item = await getItemsByCode(code)
+        if (!item) {
+          logItem(`L'objet ${name} n'as pas été trouvé`, 'error')
+          return reject()
+        }
+
+        for (const slot of slots) {
+          try {
+            await personnage.depositItemToBank(item, 1)
+          } catch (error) {
+            continue
+          }
+        }
+      }
+    }
   })
 }

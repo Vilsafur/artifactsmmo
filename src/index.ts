@@ -5,11 +5,14 @@ import { Character } from './character'
 import { playerColors } from './utils'
 import { createStarterSet } from './tasks'
 import { logCharacter } from './logger'
+import { getPersoWithRole, initialisation } from './team'
 
-const actions = async (name: string) => {
-  const perso = new Character(name, playerColors[0])
+const actions = async () => {
+  await initialisation()
+
+  const perso = getPersoWithRole('gearcrafter')
 
   perso.addTask(() => createStarterSet(perso, true))
 }
 
-actions('Nendar')
+actions()

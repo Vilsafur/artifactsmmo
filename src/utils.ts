@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import { CharacterRole, Skill } from './types';
 
 /**
  * Fait une pause dans le script
@@ -17,3 +18,41 @@ export const playerColors = [
   chalk.rgb(50, 205, 50),
   chalk.rgb(135, 206, 235),
 ];
+
+export const jobByRole = (role: CharacterRole): Skill[] => {
+  switch (role) {
+    case 'cooker':
+      return ['cooking']
+    case 'farmer':
+      return ['mining', 'woodcutting']
+    case 'gearcrafter':
+      return ['gearcrafting']
+    case 'weaponcrafter':
+      return ['weaponcrafting']
+    case 'jewelrycrafter':
+      return ['jewelrycrafting']
+  
+    default:
+      throw new Error(`Erreur lors de la récupération des skill pour le role ${role}`)
+  }
+}
+
+export const roleBySkill = (job: Skill): CharacterRole => {
+  switch (job) {
+    case 'cooking':
+      return 'cooker'
+    case 'gearcrafting':
+      return 'gearcrafter'
+    case 'jewelrycrafting':
+      return 'jewelrycrafter'
+    case 'mining':
+      return 'farmer'
+    case 'weaponcrafting':
+      return 'weaponcrafter'
+    case 'woodcutting':
+      return 'farmer'
+  
+    default:
+      throw new Error(`Erreur lors de la récupération du role pour le skill ${job}`)
+  }
+}

@@ -78,6 +78,13 @@ export const getItemPosition = async (item: ItemSchema, character: CharacterSche
 export const getWorkshopsPosition = async () => (await getMap()).filter(m => m.content?.type == 'workshop')
 
 /**
+ * Retourne l'emplacements de la banque
+ *
+ * @returns La position de la banque
+ */
+export const getBankPosition = async () => (await getMap()).find(m => m.content?.type == 'bank')
+
+/**
  * Retourne l'emplacement du workshop
  *
  * @param code Le code du workshop

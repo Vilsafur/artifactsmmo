@@ -1,11 +1,12 @@
 import { client } from './api'
 import { CharacterFightResponseSchema, CharacterSchema, DestinationSchema, EquipSchema, InventorySlot, ItemSchema, UnequipSchema } from './ApiArtifacts';
-import { logCharacter } from './logger';
+import { logCharacter, logMap } from './logger';
 import { getItemsByCode } from './items'
-import { getItemPosition, getWorkshopsPositionByCode } from './map';
+import { getBankPosition, getItemPosition, getWorkshopsPositionByCode } from './map';
 import { delay } from './utils';
 import { Chalk } from 'chalk';
-import { Task } from './tasks';
+import { farm, Task } from './tasks';
+import { addRetriveItemTask, getPersoWithRole, getPersoWithSkill } from './team';
 
 export class Character {
   private name
@@ -49,12 +50,15 @@ export class Character {
   }
 
   private async executeTasks(): Promise<void> {
+    logCharacter(this, `Début de l'exécution des tâches`)
     this.isExecuting = true
     while(this.tasks.length > 0) {
       const currentTask = this.tasks.shift()
       if (currentTask) {
         try {
+          logCharacter(this, `Début de l'exécution d'une tâche`)
           await currentTask()
+          logCharacter(this, `Fin de l'exécution d'une tâche`)
         } catch (error) {
           logCharacter(this, `Il y a eu un soucis lors de l'exécution de la tâche`, 'error')
         }
@@ -120,7 +124,7 @@ export class Character {
       const inInventory = (await this.getInfos()).inventory?.find(i => i.code === item.code)?.quantity ?? 0
       if (inInventory === quantity) {
         logCharacter(this, `L'objet ${item.name} est déjà dans l'inventaire`)
-        return reject()
+        return resolve()
       }
   
       let toRetrieve = quantity - inInventory
@@ -128,23 +132,33 @@ export class Character {
       while (toRetrieve > 0) {
         logCharacter(this, `${toRetrieve} objets à récupérer`)
         for (let index = 0; index < toRetrieve; index++) {
-          if (item.craft) {
-            logCharacter(this, `L'objet ${item.name} doit être fabriqué`)
-            try {
-              await this.craft(item)
-            } catch (error) {
-              return reject()              
+          try {
+            logCharacter(this, `Tentative de récupération de l'objet (${item.name}) à la banque`)
+            await this.retriveItemInBank(item, toRetrieve)
+          } catch (error) {
+            let persoToCraft = item.craft?.skill ? getPersoWithSkill(item.craft.skill) : this
+            if (persoToCraft.getName() !== this.name) {
+              return reject(1)
             }
-          } else {
-            logCharacter(this, `L'objet ${item.name} doit être récupéré`)
-            const position = await getItemPosition(item, await this.getInfos())
-            if (!position) {
-              return
+
+            if (item.craft) {
+              logCharacter(this, `L'objet ${item.name} doit être fabriqué`)
+              try {
+                await this.craft(item)
+              } catch (error) {
+                return reject(2)
+              }
+            } else {
+              logCharacter(this, `L'objet ${item.name} doit être récolté`)
+              logCharacter(this, `Déplacement vers l'objet ${item.name}`)
+              const position = await getItemPosition(item, await this.getInfos())
+              if (!position) {
+                return reject(2)
+              }
+              await this.move(position)
+              logCharacter(this, `Récupération de l'objet ${item.name}`)
+              await this.gathering()
             }
-            logCharacter(this, `Déplacement vers l'objet ${item.name}`)
-            await this.move(position)
-            logCharacter(this, `Récupération de l'objet ${item.name}`)
-            await this.gathering()
           }
         }
         const inInventory = (await this.getInfos()).inventory?.find(i => i.code === item.code)?.quantity ?? 0
@@ -152,7 +166,7 @@ export class Character {
           logCharacter(this, `L'objet ${item.name} est déjà dans l'inventaire`, 'info')
           return resolve()
         }
-    
+
         toRetrieve = quantity - inInventory
       }
       resolve()
@@ -182,18 +196,36 @@ export class Character {
   
       logCharacter(this, `Début de la fabrication de l'objet : ${item.name}`, 'info')
   
-      const itemsNeeded = item.craft.items
+      let itemsNeeded = item.craft.items ?? []
+      let alreadyAsk = false
   
-      if (itemsNeeded) {
+      while (itemsNeeded.length) {
         for (const itemNeeded of itemsNeeded) {
           const item = await getItemsByCode(itemNeeded.code)
           if (!item) {
             logCharacter(this, `Erreur lors de la récupération de l'objet ${itemNeeded.code}`, 'error')
             return reject()
           }
-  
-          await this.retrieveOrCraft(item, itemNeeded.quantity).catch(() => reject())
+
+          try {
+            await this.retrieveOrCraft(item, itemNeeded.quantity)  
+          } catch (error) {
+            if (error === 1 && !alreadyAsk) {
+              logCharacter(this, `Demande de récupération de l'objet ${item.name} en ${itemNeeded.quantity} exemplaire(s)`)
+              addRetriveItemTask(item, itemNeeded.quantity, this)
+              alreadyAsk = true
+            } else if (error === 2) {
+              return reject()
+            }
+          }
+
+          const inInventory = (await this.getInfos()).inventory?.find(i => i.code === item.code)?.quantity ?? 0
+          if (inInventory === itemNeeded.quantity) {
+            logCharacter(this, `L'objet ${item.name} est récupéré dans l'inventaire`)
+            itemsNeeded = itemsNeeded.filter(item => item.code !== itemNeeded.code)
+          }
         }
+        await delay(1000)
       }
   
       const workshop = await getWorkshopsPositionByCode(item.craft.skill)
@@ -215,6 +247,69 @@ export class Character {
   
       const cooldown = data.cooldown.total_seconds;
       await delay(cooldown * 1000);
+      resolve()
+    })
+  }
+
+  /**
+   * Récupère un objet dans la banque
+   *
+   * @param item L'objet à récupérer
+   * @returns 
+   */
+  async retriveItemInBank(item: ItemSchema, quantity: number): Promise<void> {
+    return new Promise(async (resolve, reject) => {
+      const bank = await getBankPosition()
+      if (!bank) {
+        logMap(`Impossible de trouver la banque`, 'error')
+        return reject()
+      }
+
+      await this.move(bank)
+      await client.my.actionWithdrawBankMyNameActionBankWithdrawPost(this.name, {code: item.code, quantity })
+        .then(v => v.json())
+        .then(async response => {
+          const cooldown = response.data.cooldown.total_seconds;
+          await delay(cooldown * 1000)
+        })
+        .catch((e: Response) => {
+          if (e.status !== 404) {
+            logCharacter(this, `Erreur dans la récupération de l'objet ${item.name} dans la banque, code de retour : ${e.status}`, 'error')
+          }
+          return reject()
+        })
+      resolve()
+    })
+  }
+
+  /**
+   * Dépose des objets à la banque
+   *
+   * @param item L'objet à déposer
+   * @param quantity La quantité à déposer
+   * @returns 
+   */
+  async depositItemToBank(item: ItemSchema, quantity: number): Promise<void> {
+    return new Promise(async (resolve, reject) => {
+      await this.retrieveOrCraft(item, quantity)
+
+      const bank = await getBankPosition()
+      if (!bank) {
+        logMap(`Impossible de trouver la banque`, 'error')
+        return reject()
+      }
+
+      await this.move(bank)
+      await client.my.actionDepositBankMyNameActionBankDepositPost(this.name, {code: item.code, quantity})
+        .then(v => v.json())
+        .then(async response => {
+          const cooldown = response.data.cooldown.total_seconds;
+          await delay(cooldown * 1000)
+        })
+        .catch((e: Response) => {
+          logCharacter(this, `Erreur dans la récupération de l'objet ${item.name} dans la banque, code de retour : ${e.status}`, 'error')
+          return reject()
+        })
       resolve()
     })
   }
