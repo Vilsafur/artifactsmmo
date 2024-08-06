@@ -51,6 +51,13 @@ export const createStarterSet = async (personnage: Character, depositToBank: boo
   })
 }
 
+/**
+ * 
+ * @param personnage Le personnage qui doit farmer l'objet
+ * @param item L'objet à récupérer
+ * @param quantity La quantité à prendre
+ * @param depositToBank Si l'objet doit être mis à la banque
+ */
 export const farm = async(personnage: Character, item: ItemSchema, quantity: number, depositToBank: boolean = false) => {
   await personnage.retrieveOrCraft(item, quantity)
   if (depositToBank) {
@@ -58,6 +65,12 @@ export const farm = async(personnage: Character, item: ItemSchema, quantity: num
   }
 }
 
+/**
+ * Fabrique une liste d'objets
+ *
+ * @param personnage Le personnage qui doit fabriquer l'objet
+ * @param items La liste d'objets à fabriquer
+ */
 const craftItems = (personnage: Character, items: Set) => {
   return new Promise(async (resolve, reject) => {
     for (const code in items) {
@@ -81,6 +94,12 @@ const craftItems = (personnage: Character, items: Set) => {
   })
 }
 
+/**
+ * Dépose des objets à la banque
+ *
+ * @param personnage Le personnage qui doit déposer des objets à la banque
+ * @param items La liste d'objets à déposer
+ */
 const depositItemsToBank = (personnage: Character, items: Set) => {
   return new Promise(async (resolve, reject) => {
     for (const code in items) {
