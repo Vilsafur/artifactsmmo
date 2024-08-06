@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { CharacterRole, Skill } from './types';
+import { CharacterRole, Set, Skill } from './types';
 
 /**
  * Fait une pause dans le script
@@ -55,4 +55,22 @@ export const roleBySkill = (job: Skill): CharacterRole => {
     default:
       throw new Error(`Erreur lors de la récupération du role pour le skill ${job}`)
   }
+}
+
+/**
+ * Compte le nombre de slot utilisé dans le set
+ *
+ * @param setObj Le set d'objet
+ * @returns Le nombre de slot
+ */
+export const getTotalSlots = (setObj: Set): number => {
+  let totalSlots = 0;
+
+  for (const key in setObj) {
+    if (setObj.hasOwnProperty(key)) {
+      totalSlots += setObj[key].slots.length;
+    }
+  }
+
+  return totalSlots;
 }

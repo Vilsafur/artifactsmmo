@@ -1,18 +1,17 @@
 import * as dotenv from 'dotenv'
 dotenv.config()
 
-import { Character } from './character'
-import { playerColors } from './utils'
-import { createStarterSet } from './tasks'
-import { logCharacter } from './logger'
-import { getPersoWithRole, initialisation } from './team'
+import { ensureWeHaveConsummable, equipSet } from './tasks'
+import { getAllPerso, initialisation } from './team'
+import { firstArmorSet } from './data/sets'
 
 const actions = async () => {
   await initialisation()
 
-  const perso = getPersoWithRole('gearcrafter')
-
-  perso.addTask(() => createStarterSet(perso, true))
+  ensureWeHaveConsummable()
+  for (const perso of getAllPerso()) {
+    perso.addTask(() => equipSet(perso, firstArmorSet))
+  }
 }
 
 actions()

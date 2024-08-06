@@ -1,10 +1,11 @@
 import { ItemSchema } from "./ApiArtifacts";
 import { Character } from "./character";
+import { firstArmorSet } from "./data/sets";
 import { getItemsByCode } from "./items";
 import { logCharacter, logItem } from "./logger";
-import { Set, Slot } from "./types";
-
-export type Task = () => Promise<void>
+import { addRetriveItemTask, getPersoWithRole } from "./team";
+import { Set } from "./types";
+import { delay, getTotalSlots } from "./utils";
 
 /**
  * Créer le set de départ comprenant les objets en cuivre + le bouclier en bois
@@ -15,37 +16,9 @@ export type Task = () => Promise<void>
  */
 export const createStarterSet = async (personnage: Character, depositToBank: boolean = false): Promise<void> => {
   return new Promise(async (resolve, reject) => {
-
-    const items: Set = {
-      copper_boots: {
-        name: 'Copper Boots',
-        slots: ['boots']
-      },
-      copper_helmet: {
-        name: 'Copper Helmet',
-        slots: ['helmet']
-      },
-      copper_ring: {
-        name: 'Copper Ring',
-        slots: ['ring1', 'ring2']
-      },
-      copper_legs_armor: {
-        name: 'Copper Legs Armor',
-        slots: ['leg_armor']
-      },
-      copper_armor: {
-        name: 'Copper Armor',
-        slots: ['body_armor']
-      },
-      wooden_shield: {
-        name: 'Wooden Shield',
-        slots: ['shield']
-      },
-    }
-
-    await craftItems(personnage, items)
+    await craftItems(personnage, firstArmorSet)
     if (depositToBank) {
-      await depositItemsToBank(personnage, items)
+      await depositItemsToBank(personnage, firstArmorSet)
     }
     return resolve()
   })
@@ -63,6 +36,80 @@ export const farm = async(personnage: Character, item: ItemSchema, quantity: num
   if (depositToBank) {
     personnage.depositItemToBank(item, quantity)
   }
+}
+
+/**
+ * S'assure qu'il y est assez de consommable pour les personnages
+ * 2 consommables par personnages => 10 au total
+ * Actuellement : Cooked Gudgeon
+ */
+export const ensureWeHaveConsummable = async (): Promise<void> => {
+  return new Promise(async (resolve, reject) => {
+    const itemCode = 'cooked_gudgeon'
+    const item = await getItemsByCode(itemCode)
+
+    if (!item) {
+      logItem(`L'objet avec le code ${itemCode} n'est pas trouvable`)
+      return reject()  
+    }
+
+    const personnage = await getPersoWithRole('cooker')
+    personnage.addTask(() => farm(personnage, item, 10))
+  })
+}
+
+/**
+ * Equipe le set d'objet spécifié au personnage
+ *
+ * @param personnage Le personnage qui doit équiper le set
+ * @param items La liste des objets à équiper
+ */
+export const equipSet = (personnage: Character, items: Set): Promise<void> => {
+  return new Promise(async (resolve, reject) => {
+    const itemAsk: string[] = []
+    const itemEquip: string[] = []
+    const totalItemToEquip = getTotalSlots(items)
+
+    for (const code in items) {
+      if (Object.prototype.hasOwnProperty.call(items, code)) {
+        const { name, slots } = items[code];
+
+        const item = await getItemsByCode(code)
+        if (!item) {
+          logItem(`L'objet ${name} n'as pas été trouvé`, 'error')
+          return reject()
+        }
+
+
+        for (const slot of slots) {
+          if ((await personnage.getInfos())[`${slot}_slot`] == code) {
+            logCharacter(personnage, `L'objet ${item.name} est déjà équipé à l'emplacement ${slot}`)
+            continue
+          }
+          try {
+            await personnage.retrieveOrCraft(item, 1).then(async () => {
+              await personnage.equip({ code, slot })
+              itemEquip.push(`${code}-${slot}`)
+            })
+          } catch (error) {
+            if (error === 1 && !itemAsk.find(v => v == `${code}-${slot}`)) {
+              logCharacter(personnage, `Demande de récupération de l'objet ${item.name}`)
+              addRetriveItemTask(item, 1)
+              itemAsk.push(`${code}-${slot}`)
+            } else if (error === 2) {
+              return reject()
+            }
+          }
+        }
+      }
+    }
+
+    if (itemEquip.length < totalItemToEquip) {
+      await delay(1000)
+      personnage.addTask(() => equipSet(personnage, items))
+    }
+    resolve()
+  })
 }
 
 /**

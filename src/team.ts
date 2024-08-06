@@ -2,9 +2,9 @@ import { client } from "./api";
 import { ItemSchema } from "./ApiArtifacts";
 import { Character } from "./character";
 import { logCharacter, logTeam } from "./logger";
-import { farm, Task } from "./tasks";
+import { farm } from "./tasks";
 import { CharacterRole, Skill, Skin } from "./types";
-import { playerColors, roleBySkill } from "./utils";
+import { delay, playerColors, roleBySkill } from "./utils";
 
 const team: {
   [key in CharacterRole]?: Character
@@ -42,6 +42,7 @@ export const initialisation = async () => {
     },
   ]
 
+  let cooldown = 0
   for (const index in persos) {
     if (Object.prototype.hasOwnProperty.call(persos, index)) {
       const p = persos[index];
@@ -58,10 +59,25 @@ export const initialisation = async () => {
         })
       }
       team[p.role] = perso
+
+      const persoCooldown = (await perso.getInfos()).cooldown
+      if (persoCooldown > cooldown) {
+        cooldown = persoCooldown
+      }
     }
   }
+
+  await delay(cooldown * 1000)
+
+  logTeam(`Fin de l'initialisation des personnages`, 'info')
 }
 
+/**
+ * Récupère un personnage suivant un rôle
+ *
+ * @param role Le rôle à chercher
+ * @returns Le personnage possédant le rôle
+ */
 export const getPersoWithRole = (role: CharacterRole): Character => {
   if (!team[role]) {
     throw new Error(`L'équipe n'est pas initialisée`)
@@ -69,9 +85,21 @@ export const getPersoWithRole = (role: CharacterRole): Character => {
   return team[role]
 }
 
+/**
+ * Récupère un personnage suivant une compétence
+ *
+ * @param skill La compétence à chercher
+ * @returns Le personnage avec la compétence
+ */
 export const getPersoWithSkill = (skill: Skill) => getPersoWithRole(roleBySkill(skill))
 
-export const addRetriveItemTask = async (item: ItemSchema, quantity: number, requestor: Character) => {
+/**
+ * Ajoute une tache de récupération d'objet au bon personnage
+ *
+ * @param item L'objet à fabriquer
+ * @param quantity La quantité nécessaire
+ */
+export const addRetriveItemTask = async (item: ItemSchema, quantity: number) => {
   const persoToCraft = item.craft?.skill ? getPersoWithSkill(item.craft.skill) : undefined
   if (!persoToCraft) {
     throw new Error(`Impossible de trouver de personnage pour récupérer l'objet ${item.name}`)
@@ -79,3 +107,10 @@ export const addRetriveItemTask = async (item: ItemSchema, quantity: number, req
 
   persoToCraft.addTask(() => farm(persoToCraft, item, quantity, true))
 }
+
+/**
+ * Retourne la liste des personnage sous forme de tableaux
+ *
+ * @returns La liste des personnage
+ */
+export const getAllPerso = (): Character[] => Object.values(team)

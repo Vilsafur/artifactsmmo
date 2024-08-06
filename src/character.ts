@@ -5,8 +5,8 @@ import { getItemsByCode } from './items'
 import { getBankPosition, getItemPosition, getWorkshopsPositionByCode } from './map';
 import { delay } from './utils';
 import { Chalk } from 'chalk';
-import { farm, Task } from './tasks';
-import { addRetriveItemTask, getPersoWithRole, getPersoWithSkill } from './team';
+import { addRetriveItemTask, getPersoWithSkill } from './team';
+import { Task } from './types';
 
 export class Character {
   private name
@@ -43,12 +43,16 @@ export class Character {
    * @param task La tâche à effectuer
    */
   addTask(task: Task) {
+    logCharacter(this, `Réception d'une tâche : ${task.toString()}`)
     this.tasks.push(task)
     if(!this.isExecuting) {
       this.executeTasks()
     }
   }
 
+  /**
+   * Execute les tâches à faire
+   */
   private async executeTasks(): Promise<void> {
     logCharacter(this, `Début de l'exécution des tâches`)
     this.isExecuting = true
@@ -56,9 +60,9 @@ export class Character {
       const currentTask = this.tasks.shift()
       if (currentTask) {
         try {
-          logCharacter(this, `Début de l'exécution d'une tâche`)
+          logCharacter(this, `Début de l'exécution d'une tâche (${currentTask.toString()})`)
           await currentTask()
-          logCharacter(this, `Fin de l'exécution d'une tâche`)
+          logCharacter(this, `Fin de l'exécution d'une tâche (${currentTask.toString()})`)
         } catch (error) {
           logCharacter(this, `Il y a eu un soucis lors de l'exécution de la tâche`, 'error')
         }
@@ -212,7 +216,7 @@ export class Character {
           } catch (error) {
             if (error === 1 && !alreadyAsk) {
               logCharacter(this, `Demande de récupération de l'objet ${item.name} en ${itemNeeded.quantity} exemplaire(s)`)
-              addRetriveItemTask(item, itemNeeded.quantity, this)
+              addRetriveItemTask(item, itemNeeded.quantity)
               alreadyAsk = true
             } else if (error === 2) {
               return reject()
