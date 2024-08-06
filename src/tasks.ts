@@ -34,7 +34,7 @@ export const createStarterSet = async (personnage: Character, depositToBank: boo
 export const farm = async(personnage: Character, item: ItemSchema, quantity: number, depositToBank: boolean = false) => {
   await personnage.retrieveOrCraft(item, quantity)
   if (depositToBank) {
-    personnage.depositItemToBank(item, quantity)
+    await personnage.depositItemToBank(item, quantity)
   }
 }
 
@@ -54,7 +54,7 @@ export const ensureWeHaveConsummable = async (): Promise<void> => {
     }
 
     const personnage = await getPersoWithRole('cooker')
-    personnage.addTask(() => farm(personnage, item, 10))
+    personnage.addTask({ promise: () => farm(personnage, item, 10), name: `Récupère 10 ${item.name}` })
   })
 }
 
@@ -106,7 +106,7 @@ export const equipSet = (personnage: Character, items: Set): Promise<void> => {
 
     if (itemEquip.length < totalItemToEquip) {
       await delay(1000)
-      personnage.addTask(() => equipSet(personnage, items))
+      personnage.addTask({ promise: () => equipSet(personnage, items), name: "Equipe un set" })
     }
     resolve()
   })

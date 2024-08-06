@@ -7,6 +7,7 @@ import { delay } from './utils';
 import { Chalk } from 'chalk';
 import { addRetriveItemTask, getPersoWithSkill } from './team';
 import { Task } from './types';
+import { addTask as addTaskToInterface, removeTask as removeTaskToInterface } from './interface';
 
 export class Character {
   private name
@@ -24,7 +25,7 @@ export class Character {
    *
    * @returns La nom du personnage
    */
-  getName(): String {
+  getName(): string {
     return this.name
   }
 
@@ -43,8 +44,9 @@ export class Character {
    * @param task La tâche à effectuer
    */
   addTask(task: Task) {
-    logCharacter(this, `Réception d'une tâche : ${task.toString()}`)
+    
     this.tasks.push(task)
+    addTaskToInterface(this, task.name)
     if(!this.isExecuting) {
       this.executeTasks()
     }
@@ -61,7 +63,8 @@ export class Character {
       if (currentTask) {
         try {
           logCharacter(this, `Début de l'exécution d'une tâche (${currentTask.toString()})`)
-          await currentTask()
+          await currentTask.promise()
+          removeTaskToInterface(this, currentTask.name)
           logCharacter(this, `Fin de l'exécution d'une tâche (${currentTask.toString()})`)
         } catch (error) {
           logCharacter(this, `Il y a eu un soucis lors de l'exécution de la tâche`, 'error')
@@ -140,6 +143,9 @@ export class Character {
             logCharacter(this, `Tentative de récupération de l'objet (${item.name}) à la banque`)
             await this.retriveItemInBank(item, toRetrieve)
           } catch (error) {
+            if (error == 1) {
+              return reject(1)
+            }
             let persoToCraft = item.craft?.skill ? getPersoWithSkill(item.craft.skill) : this
             if (persoToCraft.getName() !== this.name) {
               return reject(1)
@@ -277,8 +283,18 @@ export class Character {
           await delay(cooldown * 1000)
         })
         .catch((e: Response) => {
-          if (e.status !== 404) {
-            logCharacter(this, `Erreur dans la récupération de l'objet ${item.name} dans la banque, code de retour : ${e.status}`, 'error')
+          switch (e.status) {
+            case 404:
+              break;
+            case 478:
+              logCharacter(this, `Demande de récupération de l'objet ${item.name} en ${quantity} exemplaire(s)`)
+              addRetriveItemTask(item, quantity)
+              return reject(1)
+              break;
+          
+            default:
+              logCharacter(this, `Erreur dans la récupération de l'objet ${item.name} dans la banque, code de retour : ${e.status}`, 'error')
+              break;
           }
           return reject()
         })

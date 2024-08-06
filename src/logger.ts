@@ -1,5 +1,6 @@
 import chalk, { Chalk } from 'chalk';
 import { Character } from './character';
+import { addLog } from './interface';
 
 type Level = 'debug' | 'info' | 'error'
 
@@ -26,7 +27,7 @@ const log = (color: Chalk, message: string, level: Level): void => {
     default:
       break;
   }
-  console.log(color(logMessage))
+  addLog(color(logMessage))
 }
 
 /**

@@ -6,7 +6,7 @@ export type CharacterRole = "farmer" | "weaponcrafter" | "cooker" | "jewelrycraf
 
 export type Skill = "cooking" | "mining" | "woodcutting" | "gearcrafting" | "weaponcrafting" | "jewelrycrafting"
 
-export type Task = () => Promise<void>
+export type Task = { promise: () => Promise<void>, name: string }
 
 export interface Set {
     [key: string]: {

@@ -47,12 +47,10 @@ export const initialisation = async () => {
     if (Object.prototype.hasOwnProperty.call(persos, index)) {
       const p = persos[index];
       const perso = new Character(p.name, playerColors[index])
-      logCharacter(perso, `Initialisation du personnage`)
 
       try {
         await client.characters.getCharacterCharactersNameGet(p.name)
       } catch (error) {
-        logCharacter(perso, `Création du personnage dans l'api`)
         await client.characters.createCharacterCharactersCreatePost({
           name: p.name,
           skin: p.skin
@@ -68,8 +66,6 @@ export const initialisation = async () => {
   }
 
   await delay(cooldown * 1000)
-
-  logTeam(`Fin de l'initialisation des personnages`, 'info')
 }
 
 /**
@@ -105,7 +101,7 @@ export const addRetriveItemTask = async (item: ItemSchema, quantity: number) => 
     throw new Error(`Impossible de trouver de personnage pour récupérer l'objet ${item.name}`)
   }
 
-  persoToCraft.addTask(() => farm(persoToCraft, item, quantity, true))
+  persoToCraft.addTask({ promise: () => farm(persoToCraft, item, quantity, true), name: `Récupère ${quantity} ${item.name}` })
 }
 
 /**
