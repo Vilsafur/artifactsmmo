@@ -62,12 +62,12 @@ export class Character {
       const currentTask = this.tasks.shift()
       if (currentTask) {
         try {
-          logCharacter(this, `Début de l'exécution d'une tâche (${currentTask.toString()})`)
+          logCharacter(this, `Début de l'exécution d'une tâche (${currentTask.name})`)
           await currentTask.promise()
           removeTaskToInterface(this, currentTask.name)
-          logCharacter(this, `Fin de l'exécution d'une tâche (${currentTask.toString()})`)
+          logCharacter(this, `Fin de l'exécution d'une tâche (${currentTask.name})`)
         } catch (error) {
-          logCharacter(this, `Il y a eu un soucis lors de l'exécution de la tâche`, 'error')
+          logCharacter(this, `Il y a eu un soucis lors de l'exécution de la tâche ${currentTask.name}`)
         }
       }
     }
@@ -261,78 +261,78 @@ export class Character {
     })
   }
 
-  /**
+/**
    * Récupère un objet dans la banque
    *
    * @param item L'objet à récupérer
    * @returns 
    */
-  async retriveItemInBank(item: ItemSchema, quantity: number): Promise<void> {
-    return new Promise(async (resolve, reject) => {
-      const bank = await getBankPosition()
-      if (!bank) {
-        logMap(`Impossible de trouver la banque`, 'error')
+async retriveItemInBank(item: ItemSchema, quantity: number): Promise<void> {
+  return new Promise(async (resolve, reject) => {
+    const bank = await getBankPosition()
+    if (!bank) {
+      logMap(`Impossible de trouver la banque`, 'error')
+      return reject()
+    }
+
+    await this.move(bank)
+    await client.my.actionWithdrawBankMyNameActionBankWithdrawPost(this.name, {code: item.code, quantity })
+      .then(v => v.json())
+      .then(async response => {
+        const cooldown = response.data.cooldown.total_seconds;
+        await delay(cooldown * 1000)
+      })
+      .catch((e: Response) => {
+        switch (e.status) {
+          case 404:
+            break;
+          case 478:
+            logCharacter(this, `Demande de récupération de l'objet ${item.name} en ${quantity} exemplaire(s)`)
+            addRetriveItemTask(item, quantity)
+            return reject(1)
+            break;
+        
+          default:
+            logCharacter(this, `Erreur dans la récupération de l'objet ${item.name} dans la banque, code de retour : ${e.status}`, 'error')
+            break;
+        }
         return reject()
-      }
+      })
+    resolve()
+  })
+}
 
-      await this.move(bank)
-      await client.my.actionWithdrawBankMyNameActionBankWithdrawPost(this.name, {code: item.code, quantity })
-        .then(v => v.json())
-        .then(async response => {
-          const cooldown = response.data.cooldown.total_seconds;
-          await delay(cooldown * 1000)
-        })
-        .catch((e: Response) => {
-          switch (e.status) {
-            case 404:
-              break;
-            case 478:
-              logCharacter(this, `Demande de récupération de l'objet ${item.name} en ${quantity} exemplaire(s)`)
-              addRetriveItemTask(item, quantity)
-              return reject(1)
-              break;
-          
-            default:
-              logCharacter(this, `Erreur dans la récupération de l'objet ${item.name} dans la banque, code de retour : ${e.status}`, 'error')
-              break;
-          }
-          return reject()
-        })
-      resolve()
-    })
-  }
+/**
+ * Dépose des objets à la banque
+ *
+ * @param item L'objet à déposer
+ * @param quantity La quantité à déposer
+ * @returns 
+ */
+async depositItemToBank(item: ItemSchema, quantity: number): Promise<void> {
+  return new Promise(async (resolve, reject) => {
+    await this.retrieveOrCraft(item, quantity)
 
-  /**
-   * Dépose des objets à la banque
-   *
-   * @param item L'objet à déposer
-   * @param quantity La quantité à déposer
-   * @returns 
-   */
-  async depositItemToBank(item: ItemSchema, quantity: number): Promise<void> {
-    return new Promise(async (resolve, reject) => {
-      await this.retrieveOrCraft(item, quantity)
+    const bank = await getBankPosition()
+    if (!bank) {
+      logMap(`Impossible de trouver la banque`, 'error')
+      return reject()
+    }
 
-      const bank = await getBankPosition()
-      if (!bank) {
-        logMap(`Impossible de trouver la banque`, 'error')
+    await this.move(bank)
+    await client.my.actionDepositBankMyNameActionBankDepositPost(this.name, {code: item.code, quantity})
+      .then(v => v.json())
+      .then(async response => {
+        const cooldown = response.data.cooldown.total_seconds;
+        await delay(cooldown * 1000)
+      })
+      .catch((e: Response) => {
+        logCharacter(this, `Erreur dans la récupération de l'objet ${item.name} dans la banque, code de retour : ${e.status}`, 'error')
         return reject()
-      }
-
-      await this.move(bank)
-      await client.my.actionDepositBankMyNameActionBankDepositPost(this.name, {code: item.code, quantity})
-        .then(v => v.json())
-        .then(async response => {
-          const cooldown = response.data.cooldown.total_seconds;
-          await delay(cooldown * 1000)
-        })
-        .catch((e: Response) => {
-          logCharacter(this, `Erreur dans la récupération de l'objet ${item.name} dans la banque, code de retour : ${e.status}`, 'error')
-          return reject()
-        })
-      resolve()
-    })
-  }
+      })
+    resolve()
+  })
+}
 
   /**
    * Déplace le personnage à l'endroit indiqué

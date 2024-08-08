@@ -1,6 +1,7 @@
 import chalk, { Chalk } from 'chalk';
 import { Character } from './character';
 import { addLog } from './interface';
+import { writeFile } from 'fs/promises';
 
 type Level = 'debug' | 'info' | 'error'
 
@@ -28,6 +29,7 @@ const log = (color: Chalk, message: string, level: Level): void => {
       break;
   }
   addLog(color(logMessage))
+  writeFile(`./debug.log`, logMessage + "\r\n", { flag: 'a' })
 }
 
 /**
