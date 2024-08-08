@@ -14,6 +14,39 @@ export interface ActionItemBankResponseSchema {
   data: BankItemSchema;
 }
 
+/** ActiveEventSchema */
+export interface ActiveEventSchema {
+  /**
+   * Name
+   * Name of the event.
+   */
+  name: string;
+  /** Map of the event. */
+  map: MapSchema;
+  /**
+   * Previous Skin
+   * Previous map skin.
+   */
+  previous_skin: string;
+  /**
+   * Duration
+   * Duration in minutes.
+   */
+  duration: number;
+  /**
+   * Expiration
+   * Expiration datetime.
+   * @format date-time
+   */
+  expiration: string;
+  /**
+   * Created At
+   * Start datetime.
+   * @format date-time
+   */
+  created_at: string;
+}
+
 /** AddAccountSchema */
 export interface AddAccountSchema {
   /**
@@ -67,8 +100,9 @@ export interface AnnouncementSchema {
   /**
    * Created At
    * Datetime of the announcement.
+   * @format date-time
    */
-  created_at?: string | null;
+  created_at?: string;
 }
 
 /** BankItemSchema */
@@ -147,7 +181,7 @@ export interface CharacterMovementDataSchema {
   /** Cooldown details */
   cooldown: CooldownSchema;
   /** Destination details. */
-  destination: DestinationResponseSchema;
+  destination: MapSchema;
   /** Character details. */
   character: CharacterSchema;
 }
@@ -519,206 +553,6 @@ export interface CharacterSchema {
    * List of inventory slots.
    */
   inventory?: InventorySlot[];
-  /**
-   * Inventory Slot1
-   * Deprecated** Inventory slot 1.
-   */
-  inventory_slot1: string;
-  /**
-   * Inventory Slot1 Quantity
-   * Deprecated** Inventory 1 quantity.
-   */
-  inventory_slot1_quantity: number;
-  /**
-   * Inventory Slot2
-   * Deprecated** Inventory slot 2.
-   */
-  inventory_slot2: string;
-  /**
-   * Inventory Slot2 Quantity
-   * Deprecated** Inventory 2 quantity.
-   */
-  inventory_slot2_quantity: number;
-  /**
-   * Inventory Slot3
-   * Deprecated** Inventory slot 3.
-   */
-  inventory_slot3: string;
-  /**
-   * Inventory Slot3 Quantity
-   * Deprecated** Inventory 3 quantity.
-   */
-  inventory_slot3_quantity: number;
-  /**
-   * Inventory Slot4
-   * Deprecated** Inventory slot 4.
-   */
-  inventory_slot4: string;
-  /**
-   * Inventory Slot4 Quantity
-   * Deprecated** Inventory 4 quantity.
-   */
-  inventory_slot4_quantity: number;
-  /**
-   * Inventory Slot5
-   * Deprecated** Inventory slot 5.
-   */
-  inventory_slot5: string;
-  /**
-   * Inventory Slot5 Quantity
-   * Deprecated** Inventory 5 quantity.
-   */
-  inventory_slot5_quantity: number;
-  /**
-   * Inventory Slot6
-   * Deprecated** Inventory slot 6.
-   */
-  inventory_slot6: string;
-  /**
-   * Inventory Slot6 Quantity
-   * Deprecated** Inventory 6 quantity.
-   */
-  inventory_slot6_quantity: number;
-  /**
-   * Inventory Slot7
-   * Deprecated** Inventory slot 7.
-   */
-  inventory_slot7: string;
-  /**
-   * Inventory Slot7 Quantity
-   * Deprecated** Inventory 7 quantity.
-   */
-  inventory_slot7_quantity: number;
-  /**
-   * Inventory Slot8
-   * Deprecated** Inventory slot 8.
-   */
-  inventory_slot8: string;
-  /**
-   * Inventory Slot8 Quantity
-   * Deprecated** Inventory 8 quantity.
-   */
-  inventory_slot8_quantity: number;
-  /**
-   * Inventory Slot9
-   * Deprecated** Inventory slot 9.
-   */
-  inventory_slot9: string;
-  /**
-   * Inventory Slot9 Quantity
-   * Deprecated** Inventory 9 quantity.
-   */
-  inventory_slot9_quantity: number;
-  /**
-   * Inventory Slot10
-   * Deprecated** Inventory slot 10.
-   */
-  inventory_slot10: string;
-  /**
-   * Inventory Slot10 Quantity
-   * Deprecated** Inventory 10 quantity.
-   */
-  inventory_slot10_quantity: number;
-  /**
-   * Inventory Slot11
-   * Deprecated** Inventory slot 11.
-   */
-  inventory_slot11: string;
-  /**
-   * Inventory Slot11 Quantity
-   * Deprecated** Inventory 11 quantity.
-   */
-  inventory_slot11_quantity: number;
-  /**
-   * Inventory Slot12
-   * Deprecated** nventory slot 12.
-   */
-  inventory_slot12: string;
-  /**
-   * Inventory Slot12 Quantity
-   * Deprecated** Inventory 12 quantity.
-   */
-  inventory_slot12_quantity: number;
-  /**
-   * Inventory Slot13
-   * Deprecated** Inventory slot 13.
-   */
-  inventory_slot13: string;
-  /**
-   * Inventory Slot13 Quantity
-   * Deprecated** Inventory 13 quantity.
-   */
-  inventory_slot13_quantity: number;
-  /**
-   * Inventory Slot14
-   * Deprecated** Inventory slot 14.
-   */
-  inventory_slot14: string;
-  /**
-   * Inventory Slot14 Quantity
-   * Deprecated** Inventory 14 quantity.
-   */
-  inventory_slot14_quantity: number;
-  /**
-   * Inventory Slot15
-   * Deprecated** Inventory slot 15.
-   */
-  inventory_slot15: string;
-  /**
-   * Inventory Slot15 Quantity
-   * Deprecated** Inventory 15 quantity.
-   */
-  inventory_slot15_quantity: number;
-  /**
-   * Inventory Slot16
-   * Deprecated** Inventory slot 16.
-   */
-  inventory_slot16: string;
-  /**
-   * Inventory Slot16 Quantity
-   * Deprecated** Inventory 16 quantity.
-   */
-  inventory_slot16_quantity: number;
-  /**
-   * Inventory Slot17
-   * Deprecated** Inventory slot 17.
-   */
-  inventory_slot17: string;
-  /**
-   * Inventory Slot17 Quantity
-   * Deprecated** Inventory 17 quantity.
-   */
-  inventory_slot17_quantity: number;
-  /**
-   * Inventory Slot18
-   * Deprecated** Inventory slot 18.
-   */
-  inventory_slot18: string;
-  /**
-   * Inventory Slot18 Quantity
-   * Deprecated** Inventory 18 quantity.
-   */
-  inventory_slot18_quantity: number;
-  /**
-   * Inventory Slot19
-   * Deprecated** Inventory slot 19.
-   */
-  inventory_slot19: string;
-  /**
-   * Inventory Slot19 Quantity
-   * Deprecated** Inventory 19 quantity.
-   */
-  inventory_slot19_quantity: number;
-  /**
-   * Inventory Slot20
-   * Deprecated** Inventory slot 20.
-   */
-  inventory_slot20: string;
-  /**
-   * Inventory Slot20 Quantity
-   * Deprecated** Inventory 20 quantity.
-   */
-  inventory_slot20_quantity: number;
 }
 
 /** CooldownSchema */
@@ -734,15 +568,11 @@ export interface CooldownSchema {
    */
   remaining_seconds: number;
   /**
-   * Totalseconds
-   * Deprecated** The total seconds of the cooldown.
+   * Started At
+   * The start of the cooldown.
+   * @format date-time
    */
-  totalSeconds: number;
-  /**
-   * Remainingseconds
-   * Deprecated** The remaining seconds of the cooldown.
-   */
-  remainingSeconds: number;
+  started_at: string;
   /**
    * Expiration
    * The expiration of the cooldown.
@@ -810,10 +640,10 @@ export interface CraftingSchema {
   quantity?: number;
 }
 
-/** DataPage[CharacterSchema] */
-export interface DataPageCharacterSchema {
+/** DataPage[ActiveEventSchema] */
+export interface DataPageActiveEventSchema {
   /** Data */
-  data: CharacterSchema[];
+  data: ActiveEventSchema[];
   /** Total */
   total: number | null;
   /** Page */
@@ -824,10 +654,10 @@ export interface DataPageCharacterSchema {
   pages?: number | null;
 }
 
-/** DataPage[EventSchema] */
-export interface DataPageEventSchema {
+/** DataPage[CharacterSchema] */
+export interface DataPageCharacterSchema {
   /** Data */
-  data: EventSchema[];
+  data: CharacterSchema[];
   /** Total */
   total: number | null;
   /** Page */
@@ -936,6 +766,18 @@ export interface DataPageSimpleItemSchema {
   pages?: number | null;
 }
 
+/** DeleteCharacterSchema */
+export interface DeleteCharacterSchema {
+  /**
+   * Name
+   * Character name.
+   * @minLength 3
+   * @maxLength 12
+   * @pattern ^[a-zA-Z0-9_-]+$
+   */
+  name: string;
+}
+
 /** DeleteItemResponseSchema */
 export interface DeleteItemResponseSchema {
   data: DeleteItemSchema;
@@ -961,30 +803,6 @@ export interface DepositWithdrawGoldSchema {
   quantity: number;
 }
 
-/** DestinationResponseSchema */
-export interface DestinationResponseSchema {
-  /**
-   * Name
-   * The name of the destination.
-   */
-  name: string;
-  /**
-   * X
-   * The x coordinate of the destination.
-   */
-  x: number;
-  /**
-   * Y
-   * The y coordinate of the destination.
-   */
-  y: number;
-  /**
-   * Content
-   * Content of the destination.
-   */
-  content: any;
-}
-
 /** DestinationSchema */
 export interface DestinationSchema {
   /**
@@ -997,6 +815,34 @@ export interface DestinationSchema {
    * The y coordinate of the destination.
    */
   y: number;
+}
+
+/** DropRateSchema */
+export interface DropRateSchema {
+  /**
+   * Item code
+   * Item code.
+   * @pattern ^[a-zA-Z0-9_-]+$
+   */
+  code: string;
+  /**
+   * Rate
+   * Chance rate.
+   * @min 1
+   */
+  rate: number;
+  /**
+   * Min Quantity
+   * Minimum quantity.
+   * @min 1
+   */
+  min_quantity: number;
+  /**
+   * Max Quantity
+   * Maximum quantity.
+   * @min 1
+   */
+  max_quantity: number;
 }
 
 /** DropSchema */
@@ -1074,39 +920,6 @@ export interface EquipSchema {
 /** EquipmentResponseSchema */
 export interface EquipmentResponseSchema {
   data: EquipRequestSchema;
-}
-
-/** EventSchema */
-export interface EventSchema {
-  /**
-   * Name
-   * Name of the event.
-   */
-  name: string;
-  /** Map of the event. */
-  map: MapSchema;
-  /**
-   * Previous Skin
-   * Previous map skin.
-   */
-  previous_skin: string;
-  /**
-   * Duration
-   * Duration in minutes.
-   */
-  duration: number;
-  /**
-   * Expiration
-   * Expiration datetime.
-   * @format date-time
-   */
-  expiration: string;
-  /**
-   * Created At
-   * Start datetime.
-   * @format date-time
-   */
-  created_at: string;
 }
 
 /** FightSchema */
@@ -1351,7 +1164,7 @@ export interface ItemSchema {
    */
   effects?: ItemEffectSchema[];
   /** Craft information. If applicable. */
-  craft?: CraftSchema;
+  craft?: CraftSchema | null;
 }
 
 /** LogSchema */
@@ -1526,571 +1339,7 @@ export interface MonsterSchema {
    * Drops
    * Monster drops. This is a list of items that the monster drops after killing the monster.
    */
-  drops: any[];
-}
-
-/** MyCharacterSchema */
-export interface MyCharacterSchema {
-  /**
-   * Name
-   * Name of the character.
-   */
-  name: string;
-  /**
-   * Skin
-   * Character skin code.
-   */
-  skin: "men1" | "men2" | "men3" | "women1" | "women2" | "women3";
-  /**
-   * Level
-   * Combat level.
-   */
-  level: number;
-  /**
-   * Xp
-   * The current xp level of the combat level.
-   */
-  xp: number;
-  /**
-   * Max Xp
-   * XP required to level up the character.
-   */
-  max_xp: number;
-  /**
-   * Total Xp
-   * Total XP of your character.
-   */
-  total_xp: number;
-  /**
-   * Gold
-   * The numbers of golds on this character.
-   */
-  gold: number;
-  /**
-   * Speed
-   * *Not available, on the roadmap. Character movement speed.
-   */
-  speed: number;
-  /**
-   * Mining Level
-   * Mining level.
-   */
-  mining_level: number;
-  /**
-   * Mining Xp
-   * The current xp level of the Mining skill.
-   */
-  mining_xp: number;
-  /**
-   * Mining Max Xp
-   * Mining XP required to level up the skill.
-   */
-  mining_max_xp: number;
-  /**
-   * Woodcutting Level
-   * Woodcutting level.
-   */
-  woodcutting_level: number;
-  /**
-   * Woodcutting Xp
-   * The current xp level of the Woodcutting skill.
-   */
-  woodcutting_xp: number;
-  /**
-   * Woodcutting Max Xp
-   * Woodcutting XP required to level up the skill.
-   */
-  woodcutting_max_xp: number;
-  /**
-   * Fishing Level
-   * Fishing level.
-   */
-  fishing_level: number;
-  /**
-   * Fishing Xp
-   * The current xp level of the Fishing skill.
-   */
-  fishing_xp: number;
-  /**
-   * Fishing Max Xp
-   * Fishing XP required to level up the skill.
-   */
-  fishing_max_xp: number;
-  /**
-   * Weaponcrafting Level
-   * Weaponcrafting level.
-   */
-  weaponcrafting_level: number;
-  /**
-   * Weaponcrafting Xp
-   * The current xp level of the Weaponcrafting skill.
-   */
-  weaponcrafting_xp: number;
-  /**
-   * Weaponcrafting Max Xp
-   * Weaponcrafting XP required to level up the skill.
-   */
-  weaponcrafting_max_xp: number;
-  /**
-   * Gearcrafting Level
-   * Gearcrafting level.
-   */
-  gearcrafting_level: number;
-  /**
-   * Gearcrafting Xp
-   * The current xp level of the Gearcrafting skill.
-   */
-  gearcrafting_xp: number;
-  /**
-   * Gearcrafting Max Xp
-   * Gearcrafting XP required to level up the skill.
-   */
-  gearcrafting_max_xp: number;
-  /**
-   * Jewelrycrafting Level
-   * Jewelrycrafting level.
-   */
-  jewelrycrafting_level: number;
-  /**
-   * Jewelrycrafting Xp
-   * The current xp level of the Jewelrycrafting skill.
-   */
-  jewelrycrafting_xp: number;
-  /**
-   * Jewelrycrafting Max Xp
-   * Jewelrycrafting XP required to level up the skill.
-   */
-  jewelrycrafting_max_xp: number;
-  /**
-   * Cooking Level
-   * The current xp level of the Cooking skill.
-   */
-  cooking_level: number;
-  /**
-   * Cooking Xp
-   * Cooking XP.
-   */
-  cooking_xp: number;
-  /**
-   * Cooking Max Xp
-   * Cooking XP required to level up the skill.
-   */
-  cooking_max_xp: number;
-  /**
-   * Hp
-   * Character HP.
-   */
-  hp: number;
-  /**
-   * Haste
-   * *Character Haste. Increase speed attack (reduce fight cooldown)
-   */
-  haste: number;
-  /**
-   * Critical Strike
-   * *Not available, on the roadmap. Character Critical   Strike. Critical strikes increase the attack's damage.
-   */
-  critical_strike: number;
-  /**
-   * Stamina
-   * *Not available, on the roadmap. Regenerates life at the start of each turn.
-   */
-  stamina: number;
-  /**
-   * Attack Fire
-   * Fire attack.
-   */
-  attack_fire: number;
-  /**
-   * Attack Earth
-   * Earth attack.
-   */
-  attack_earth: number;
-  /**
-   * Attack Water
-   * Water attack.
-   */
-  attack_water: number;
-  /**
-   * Attack Air
-   * Air attack.
-   */
-  attack_air: number;
-  /**
-   * Dmg Fire
-   * % Fire damage.
-   */
-  dmg_fire: number;
-  /**
-   * Dmg Earth
-   * % Earth damage.
-   */
-  dmg_earth: number;
-  /**
-   * Dmg Water
-   * % Water damage.
-   */
-  dmg_water: number;
-  /**
-   * Dmg Air
-   * % Air damage.
-   */
-  dmg_air: number;
-  /**
-   * Res Fire
-   * % Fire resistance.
-   */
-  res_fire: number;
-  /**
-   * Res Earth
-   * % Earth resistance.
-   */
-  res_earth: number;
-  /**
-   * Res Water
-   * % Water resistance.
-   */
-  res_water: number;
-  /**
-   * Res Air
-   * % Air resistance.
-   */
-  res_air: number;
-  /**
-   * X
-   * Character x coordinate.
-   */
-  x: number;
-  /**
-   * Y
-   * Character y coordinate.
-   */
-  y: number;
-  /**
-   * Cooldown
-   * Cooldown in seconds.
-   */
-  cooldown: number;
-  /**
-   * Cooldown Expiration
-   * Datetime Cooldown expiration.
-   */
-  cooldown_expiration?: string | null;
-  /**
-   * Weapon Slot
-   * Weapon slot.
-   */
-  weapon_slot: string;
-  /**
-   * Shield Slot
-   * Shield slot.
-   */
-  shield_slot: string;
-  /**
-   * Helmet Slot
-   * Helmet slot.
-   */
-  helmet_slot: string;
-  /**
-   * Body Armor Slot
-   * Body armor slot.
-   */
-  body_armor_slot: string;
-  /**
-   * Leg Armor Slot
-   * Leg armor slot.
-   */
-  leg_armor_slot: string;
-  /**
-   * Boots Slot
-   * Boots slot.
-   */
-  boots_slot: string;
-  /**
-   * Ring1 Slot
-   * Ring 1 slot.
-   */
-  ring1_slot: string;
-  /**
-   * Ring2 Slot
-   * Ring 2 slot.
-   */
-  ring2_slot: string;
-  /**
-   * Amulet Slot
-   * Amulet slot.
-   */
-  amulet_slot: string;
-  /**
-   * Artifact1 Slot
-   * Artifact 1 slot.
-   */
-  artifact1_slot: string;
-  /**
-   * Artifact2 Slot
-   * Artifact 2 slot.
-   */
-  artifact2_slot: string;
-  /**
-   * Artifact3 Slot
-   * Artifact 3 slot.
-   */
-  artifact3_slot: string;
-  /**
-   * Consumable1 Slot
-   * Consumable 1 slot.
-   */
-  consumable1_slot: string;
-  /**
-   * Consumable1 Slot Quantity
-   * Consumable 1 quantity.
-   */
-  consumable1_slot_quantity: number;
-  /**
-   * Consumable2 Slot
-   * Consumable 2 slot.
-   */
-  consumable2_slot: string;
-  /**
-   * Consumable2 Slot Quantity
-   * Consumable 2 quantity.
-   */
-  consumable2_slot_quantity: number;
-  /**
-   * Task
-   * Task in progress.
-   */
-  task: string;
-  /**
-   * Task Type
-   * Task type.
-   */
-  task_type: string;
-  /**
-   * Task Progress
-   * Task progression.
-   */
-  task_progress: number;
-  /**
-   * Task Total
-   * Task total objective.
-   */
-  task_total: number;
-  /**
-   * Inventory Max Items
-   * Inventory max items.
-   */
-  inventory_max_items: number;
-  /**
-   * Inventory
-   * List of inventory slots.
-   */
-  inventory?: InventorySlot[];
-  /**
-   * Inventory Slot1
-   * Deprecated** Inventory slot 1.
-   */
-  inventory_slot1: string;
-  /**
-   * Inventory Slot1 Quantity
-   * Deprecated** Inventory 1 quantity.
-   */
-  inventory_slot1_quantity: number;
-  /**
-   * Inventory Slot2
-   * Deprecated** Inventory slot 2.
-   */
-  inventory_slot2: string;
-  /**
-   * Inventory Slot2 Quantity
-   * Deprecated** Inventory 2 quantity.
-   */
-  inventory_slot2_quantity: number;
-  /**
-   * Inventory Slot3
-   * Deprecated** Inventory slot 3.
-   */
-  inventory_slot3: string;
-  /**
-   * Inventory Slot3 Quantity
-   * Deprecated** Inventory 3 quantity.
-   */
-  inventory_slot3_quantity: number;
-  /**
-   * Inventory Slot4
-   * Deprecated** Inventory slot 4.
-   */
-  inventory_slot4: string;
-  /**
-   * Inventory Slot4 Quantity
-   * Deprecated** Inventory 4 quantity.
-   */
-  inventory_slot4_quantity: number;
-  /**
-   * Inventory Slot5
-   * Deprecated** Inventory slot 5.
-   */
-  inventory_slot5: string;
-  /**
-   * Inventory Slot5 Quantity
-   * Deprecated** Inventory 5 quantity.
-   */
-  inventory_slot5_quantity: number;
-  /**
-   * Inventory Slot6
-   * Deprecated** Inventory slot 6.
-   */
-  inventory_slot6: string;
-  /**
-   * Inventory Slot6 Quantity
-   * Deprecated** Inventory 6 quantity.
-   */
-  inventory_slot6_quantity: number;
-  /**
-   * Inventory Slot7
-   * Deprecated** Inventory slot 7.
-   */
-  inventory_slot7: string;
-  /**
-   * Inventory Slot7 Quantity
-   * Deprecated** Inventory 7 quantity.
-   */
-  inventory_slot7_quantity: number;
-  /**
-   * Inventory Slot8
-   * Deprecated** Inventory slot 8.
-   */
-  inventory_slot8: string;
-  /**
-   * Inventory Slot8 Quantity
-   * Deprecated** Inventory 8 quantity.
-   */
-  inventory_slot8_quantity: number;
-  /**
-   * Inventory Slot9
-   * Deprecated** Inventory slot 9.
-   */
-  inventory_slot9: string;
-  /**
-   * Inventory Slot9 Quantity
-   * Deprecated** Inventory 9 quantity.
-   */
-  inventory_slot9_quantity: number;
-  /**
-   * Inventory Slot10
-   * Deprecated** Inventory slot 10.
-   */
-  inventory_slot10: string;
-  /**
-   * Inventory Slot10 Quantity
-   * Deprecated** Inventory 10 quantity.
-   */
-  inventory_slot10_quantity: number;
-  /**
-   * Inventory Slot11
-   * Deprecated** Inventory slot 11.
-   */
-  inventory_slot11: string;
-  /**
-   * Inventory Slot11 Quantity
-   * Deprecated** Inventory 11 quantity.
-   */
-  inventory_slot11_quantity: number;
-  /**
-   * Inventory Slot12
-   * Deprecated** nventory slot 12.
-   */
-  inventory_slot12: string;
-  /**
-   * Inventory Slot12 Quantity
-   * Deprecated** Inventory 12 quantity.
-   */
-  inventory_slot12_quantity: number;
-  /**
-   * Inventory Slot13
-   * Deprecated** Inventory slot 13.
-   */
-  inventory_slot13: string;
-  /**
-   * Inventory Slot13 Quantity
-   * Deprecated** Inventory 13 quantity.
-   */
-  inventory_slot13_quantity: number;
-  /**
-   * Inventory Slot14
-   * Deprecated** Inventory slot 14.
-   */
-  inventory_slot14: string;
-  /**
-   * Inventory Slot14 Quantity
-   * Deprecated** Inventory 14 quantity.
-   */
-  inventory_slot14_quantity: number;
-  /**
-   * Inventory Slot15
-   * Deprecated** Inventory slot 15.
-   */
-  inventory_slot15: string;
-  /**
-   * Inventory Slot15 Quantity
-   * Deprecated** Inventory 15 quantity.
-   */
-  inventory_slot15_quantity: number;
-  /**
-   * Inventory Slot16
-   * Deprecated** Inventory slot 16.
-   */
-  inventory_slot16: string;
-  /**
-   * Inventory Slot16 Quantity
-   * Deprecated** Inventory 16 quantity.
-   */
-  inventory_slot16_quantity: number;
-  /**
-   * Inventory Slot17
-   * Deprecated** Inventory slot 17.
-   */
-  inventory_slot17: string;
-  /**
-   * Inventory Slot17 Quantity
-   * Deprecated** Inventory 17 quantity.
-   */
-  inventory_slot17_quantity: number;
-  /**
-   * Inventory Slot18
-   * Deprecated** Inventory slot 18.
-   */
-  inventory_slot18: string;
-  /**
-   * Inventory Slot18 Quantity
-   * Deprecated** Inventory 18 quantity.
-   */
-  inventory_slot18_quantity: number;
-  /**
-   * Inventory Slot19
-   * Deprecated** Inventory slot 19.
-   */
-  inventory_slot19: string;
-  /**
-   * Inventory Slot19 Quantity
-   * Deprecated** Inventory 19 quantity.
-   */
-  inventory_slot19_quantity: number;
-  /**
-   * Inventory Slot20
-   * Deprecated** Inventory slot 20.
-   */
-  inventory_slot20: string;
-  /**
-   * Inventory Slot20 Quantity
-   * Deprecated** Inventory 20 quantity.
-   */
-  inventory_slot20_quantity: number;
-  /**
-   * Account
-   * Account name. Only included on your own characters.
-   */
-  account: string;
+  drops: DropRateSchema[];
 }
 
 /** MyCharactersListSchema */
@@ -2099,7 +1348,7 @@ export interface MyCharactersListSchema {
    * Data
    * List of your characters.
    */
-  data: MyCharacterSchema[];
+  data: CharacterSchema[];
 }
 
 /** RecyclingDataSchema */
@@ -2174,7 +1423,7 @@ export interface ResourceSchema {
    * Drops
    * The drops of this resource.
    */
-  drops: any[];
+  drops: DropRateSchema[];
 }
 
 /** ResponseSchema */
@@ -2324,7 +1573,7 @@ export interface TaskSchema {
    * Type
    * The type of task.
    */
-  type: "monsters";
+  type: "monsters" | "resources" | "crafts";
   /**
    * Total
    * The total required to complete the task.
@@ -2469,9 +1718,9 @@ export class HttpClient<SecurityDataType = unknown> {
     [ContentType.Json]: (input: any) =>
       input !== null && (typeof input === "object" || typeof input === "string") ? JSON.stringify(input) : input,
     [ContentType.Text]: (input: any) => (input !== null && typeof input !== "string" ? JSON.stringify(input) : input),
-    [ContentType.FormData]: (input: FormData) =>
-      (Array.from(input.keys()) || []).reduce((formData, key) => {
-        const property = input.get(key);
+    [ContentType.FormData]: (input: any) =>
+      Object.keys(input || {}).reduce((formData, key) => {
+        const property = input[key];
         formData.append(
           key,
           property instanceof Blob
@@ -2583,7 +1832,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title Artifacts API
- * @version 1.3
+ * @version 1.5
  *
  *
  * Artifacts is an API-based MMO game where you can manage 5 characters to explore, fight, gather resources, craft items and much more.
@@ -2954,46 +2203,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
-     * @description History of your character's actions.
-     *
-     * @tags My characters
-     * @name GetCharacterLogsMyNameLogsGet
-     * @summary Get Character Logs
-     * @request GET:/my/{name}/logs
-     * @secure
-     */
-    getCharacterLogsMyNameLogsGet: (
-      name: string,
-      query?: {
-        /**
-         * Page
-         * Page number
-         * @min 1
-         * @default 1
-         */
-        page?: number;
-        /**
-         * Size
-         * Page size
-         * @min 1
-         * @max 100
-         * @default 50
-         */
-        size?: number;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<DataPageLogSchema, void>({
-        path: `/my/${name}/logs`,
-        method: "GET",
-        query: query,
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * @description History of the last actions of all your characters.
+     * @description History of the last 100 actions of all your characters.
      *
      * @tags My characters
      * @name GetAllCharactersLogsMyLogsGet
@@ -3059,6 +2269,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     getBankItemsMyBankItemsGet: (
       query?: {
+        /**
+         * Item code
+         * Item to search in your bank.
+         * @pattern ^[a-zA-Z0-9_-]+$
+         */
+        item_code?: string;
         /**
          * Page
          * Page number
@@ -3146,6 +2362,26 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
+     * @description Delete character on your account.
+     *
+     * @tags Characters
+     * @name DeleteCharacterCharactersDeletePost
+     * @summary Delete Character
+     * @request POST:/characters/delete
+     * @secure
+     */
+    deleteCharacterCharactersDeletePost: (data: DeleteCharacterSchema, params: RequestParams = {}) =>
+      this.request<CharacterResponseSchema, void>({
+        path: `/characters/delete`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * @description Fetch characters details.
      *
      * @tags Characters
@@ -3157,9 +2393,17 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /**
          * Sort
-         * Default sort by total XP.
+         * Default sort by combat total XP.
          */
-        sort?: "woodcutting" | "mining" | "fishing" | "weaponcrafting" | "gearcrafting" | "jewelrycrafting" | "cooking";
+        sort?:
+          | "woodcutting"
+          | "mining"
+          | "fishing"
+          | "weaponcrafting"
+          | "gearcrafting"
+          | "jewelrycrafting"
+          | "cooking"
+          | "gold";
         /**
          * Page
          * Page number
@@ -3500,11 +2744,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @description Retrieve the details of a resource.
      *
      * @tags Resources
-     * @name GetResourcesResourcesCodeGet
-     * @summary Get Resources
+     * @name GetResourceResourcesCodeGet
+     * @summary Get Resource
      * @request GET:/resources/{code}
      */
-    getResourcesResourcesCodeGet: (code: string, params: RequestParams = {}) =>
+    getResourceResourcesCodeGet: (code: string, params: RequestParams = {}) =>
       this.request<ResourceResponseSchema, void>({
         path: `/resources/${code}`,
         method: "GET",
@@ -3541,7 +2785,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       },
       params: RequestParams = {},
     ) =>
-      this.request<DataPageEventSchema, void>({
+      this.request<DataPageActiveEventSchema, void>({
         path: `/events/`,
         method: "GET",
         query: query,
