@@ -1,5 +1,5 @@
 import { client } from './api'
-import { CharacterFightResponseSchema, CharacterSchema, DestinationSchema, EquipSchema, InventorySlot, ItemSchema, UnequipSchema } from './ApiArtifacts';
+import { CharacterFightResponseSchema, CharacterSchema, DestinationSchema, EquipSchema, InventorySlot, ItemSchema, SimpleItemSchema, UnequipSchema } from './ApiArtifacts';
 import { logCharacter, logMap } from './logger';
 import { getItemsByCode } from './items'
 import { getBankPosition, getItemPosition, getWorkshopsPositionByCode } from './map';
@@ -143,11 +143,9 @@ export class Character {
             logCharacter(this, `Tentative de récupération de l'objet (${item.name}) à la banque`)
             await this.retriveItemInBank(item, toRetrieve)
           } catch (error) {
-            if (error == 1) {
-              return reject(1)
-            }
             let persoToCraft = item.craft?.skill ? getPersoWithSkill(item.craft.skill) : this
             if (persoToCraft.getName() !== this.name) {
+              addRetriveItemTask(item, quantity)
               return reject(1)
             }
 
@@ -269,6 +267,17 @@ export class Character {
    */
 async retriveItemInBank(item: ItemSchema, quantity: number): Promise<void> {
   return new Promise(async (resolve, reject) => {
+    try {
+      const itemInBank = (await client.my.getBankItemsMyBankItemsGet({ item_code: item.code }).then(v => v.json())).data
+      if (itemInBank.quantity < quantity) {
+        logCharacter(this, `Demande de récupération de l'objet ${item.name} en ${quantity} exemplaire(s)`)
+        return reject(1)
+      }
+    } catch (error) {
+      logCharacter(this, `Demande de récupération de l'objet ${item.name} en ${quantity} exemplaire(s)`)
+      return reject(1)
+    }
+
     const bank = await getBankPosition()
     if (!bank) {
       logMap(`Impossible de trouver la banque`, 'error')
@@ -290,7 +299,6 @@ async retriveItemInBank(item: ItemSchema, quantity: number): Promise<void> {
             logCharacter(this, `Demande de récupération de l'objet ${item.name} en ${quantity} exemplaire(s)`)
             addRetriveItemTask(item, quantity)
             return reject(1)
-            break;
         
           default:
             logCharacter(this, `Erreur dans la récupération de l'objet ${item.name} dans la banque, code de retour : ${e.status}`, 'error')

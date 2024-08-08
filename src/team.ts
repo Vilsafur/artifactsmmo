@@ -46,6 +46,7 @@ export const initialisation = async () => {
   for (const index in persos) {
     if (Object.prototype.hasOwnProperty.call(persos, index)) {
       const p = persos[index];
+      console.log(`-> Initialisation de ${p.name} ...`)
       const perso = new Character(p.name, playerColors[index])
 
       try {
@@ -65,6 +66,7 @@ export const initialisation = async () => {
     }
   }
 
+  console.log(`-> Attente de la fin des cooldowns : ${cooldown}s ...`)
   await delay(cooldown * 1000)
 }
 
@@ -96,11 +98,13 @@ export const getPersoWithSkill = (skill: Skill) => getPersoWithRole(roleBySkill(
  * @param quantity La quantité nécessaire
  */
 export const addRetriveItemTask = async (item: ItemSchema, quantity: number) => {
-  const persoToCraft = item.craft?.skill ? getPersoWithSkill(item.craft.skill) : undefined
+  const persoToCraft = getPersoWithSkill(item.craft?.skill ?? 'mining')
   if (!persoToCraft) {
-    throw new Error(`Impossible de trouver de personnage pour récupérer l'objet ${item.name}`)
+    console.error(item)
+    throw new Error(`Impossible de trouver de personnage pour récupérer l'objet ${item.name} (skill demandé : ${item.craft?.skill})`)
   }
 
+  logTeam(`Ajout de la tâche de récupération de ${item.name} à ${persoToCraft.getName()}`)
   persoToCraft.addTask({ promise: () => farm(persoToCraft, item, quantity, true), name: `Récupère ${quantity} ${item.name}` })
 }
 

@@ -13,6 +13,7 @@ type Level = 'debug' | 'info' | 'error'
  * @param level Le niveau du message
  */
 const log = (color: Chalk, message: string, level: Level): void => {
+  writeFile(`./debug.log`, message + "\r\n", { flag: 'a' })
   if (level == 'debug' && process.env.DEBUG != 'true') {
     return
   }
@@ -29,7 +30,6 @@ const log = (color: Chalk, message: string, level: Level): void => {
       break;
   }
   addLog(color(logMessage))
-  writeFile(`./debug.log`, logMessage + "\r\n", { flag: 'a' })
 }
 
 /**
