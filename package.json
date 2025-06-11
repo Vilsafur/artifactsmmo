@@ -1,0 +1,30 @@
+{
+  "name": "artifacts",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "ts-node src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/blessed": "^0.1.25",
+    "@types/dotenv": "^6.1.1",
+    "@types/inquirer": "^9.0.8",
+    "@types/yargs": "^17.0.33",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@types/node": "^24.0.0",
+    "axios": "^1.9.0",
+    "blessed": "^0.1.81",
+    "chalk": "^5.4.1",
+    "dotenv": "^16.5.0",
+    "inquirer": "^12.6.3",
+    "yargs": "^18.0.0"
+  }
+}
