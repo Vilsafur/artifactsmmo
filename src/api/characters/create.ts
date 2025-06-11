@@ -1,7 +1,8 @@
+import type { CharacterToCreate } from '../../types/team';
 import { api } from '../client';
-import { Character } from '../types';
+import { Character } from './type';
 
-export default async function create(config: Character) {
+export default async function create(config: CharacterToCreate): Promise<Character> {
   const res = await api.post('/characters/create', {
     name: config.name,
     skin: config.skin

@@ -6,5 +6,3 @@ export interface ApiResponse<T> {
   size?: number;
   pages?: number;
 }
-
-

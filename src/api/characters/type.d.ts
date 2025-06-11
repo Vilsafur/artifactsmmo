@@ -1,7 +1,9 @@
+export type Skin = 'men1' | 'men2' | 'men3' | 'women1' | 'women2' | 'women3'
+export type SkillName = 'mining' | 'woodcutting' | 'fishing' | 'weaponcrafting' | 'gearcrafting' | 'jewelrycrafting' | 'cooking' | 'alchemy'
 // Typage d'un personnage
 export interface Character {
   name: string;
-  skin: 'men1' | 'men2' | 'men3' | 'women1' | 'women2' | 'women3';
+  skin: Skin;
   mining_level: number;
   mining_xp: number;
   mining_max_xp: number;

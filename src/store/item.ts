@@ -1,7 +1,7 @@
 import getAll from "../api/items";
 import { Item } from "../api/items/type";
 
-const items: Map<string, Item> = new Map()
+export const items: Map<string, Item> = new Map()
 
 export const loadItems = async () => {
   items.clear()
