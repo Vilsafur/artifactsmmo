@@ -5,7 +5,7 @@ export const items: Map<string, Item> = new Map()
 
 export const loadItems = async () => {
   items.clear()
-  console.log(`ℹ️ Récupération de l'ensembles des objets`)
+  console.log(`ℹ️ Récupération de l'ensemble des objets`)
   const apiItems = await getAll()
   for (const item of apiItems) {
     items.set(item.code, item)
