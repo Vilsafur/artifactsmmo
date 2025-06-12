@@ -6,6 +6,7 @@ import { loadItems } from './store/item';
 import { loadTeams } from './store/team';
 import { CharacterToCreate } from './types/team';
 import { loadMap } from './store/map';
+import { loadmonsters } from './store/monster';
 
 const characters: CharacterToCreate[] = [
   {name: 'Ares', skin: 'men1'},
@@ -18,6 +19,7 @@ async function main() {
   console.log(`🔃 Initialisation...`)
   await loadItems()
   await loadMap()
+  await loadmonsters()
   await loadTeams(characters)
   console.log(`✅ Initialisation terminée`)
   // Début de la boucle de jeu
