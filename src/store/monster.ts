@@ -3,7 +3,7 @@ import { Monster } from "../api/monsters/type";
 
 export const monsters: Map<string, Monster> = new Map()
 
-export const loadmonsters = async () => {
+export const loadMonsters = async () => {
   monsters.clear()
   console.log(`ℹ️ Récupération de l'ensembles des monstres`)
   const apimonsters = await getAll()
