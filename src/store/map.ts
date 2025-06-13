@@ -12,3 +12,13 @@ export const loadMap = async () => {
   }
   console.log(`ℹ️ Chargement de la carte terminé`)
 }
+
+export const getResourceTile = (resourceCode: string): Tile | undefined => {
+  for (const tile of map.values()) {
+    if (tile.content?.code === resourceCode) {
+      return tile
+    }
+  }
+  console.log(`⚠️ Aucune tuile trouvée pour la ressource ${resourceCode}`)
+  return undefined
+}

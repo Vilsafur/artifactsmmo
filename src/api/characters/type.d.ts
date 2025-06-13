@@ -1,3 +1,7 @@
+import { SimpleItem } from "../items/type";
+import { Tile } from "../map/type";
+import { cooldown } from "../types";
+
 export type Skin = 'men1' | 'men2' | 'men3' | 'women1' | 'women2' | 'women3'
 export type SkillName = 'mining' | 'woodcutting' | 'fishing' | 'weaponcrafting' | 'gearcrafting' | 'jewelrycrafting' | 'cooking' | 'alchemy'
 // Typage d'un personnage
@@ -28,4 +32,22 @@ export interface Character {
   alchemy_level: number;
   alchemy_xp: number;
   alchemy_max_xp: number;
+  x: number;
+  y: number;
+}
+
+export interface CharacterMovementDataSchema {
+  cooldown: cooldown;
+  destination: Tile;
+  character: Character;
+}
+
+interface SkillInfo {
+  xp: number;
+  items: SimpleItem[];
+}
+export interface SkillDataSchema {
+  cooldown: cooldown;
+  character: Character;
+  details: SkillInfo;
 }

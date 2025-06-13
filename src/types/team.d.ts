@@ -26,4 +26,8 @@ export interface TeamCharacter {
     cooking: SkillDefinition;
     alchemy: SkillDefinition;
   };
+  position: {
+    x: number;
+    y: number;
+  };
 }

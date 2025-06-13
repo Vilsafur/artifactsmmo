@@ -12,3 +12,21 @@ export const loadResources = async () => {
   }
   console.log(`ℹ️ Chargement des ressources terminé`)
 }
+
+export const get = (resourceCode: string): Resource | undefined => {
+  const resource = resources.get(resourceCode)
+  if (!resource) {
+    console.log(`⚠️ La ressource ${resourceCode} n'existe pas`)
+    return undefined
+  }
+  return resource
+}
+
+export const getResourceWhoDrop = (itemCode: string): Resource | undefined => {
+  for (const resource of resources.values()) {
+    if (resource.drops?.find(drop => drop.code === itemCode)) {
+      return resource
+    }
+  }
+  return undefined
+}

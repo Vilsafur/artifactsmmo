@@ -1,8 +1,15 @@
 import create from "../api/characters/create";
+import get from "../api/characters/get";
 import list from "../api/characters/list";
-import { Character } from "../api/characters/type";
+import { Character, SkillDataSchema } from "../api/characters/type";
 import config from "../config";
 import type { CharacterToCreate, TeamCharacter } from "../types/team";
+import taskBus from "./taskBus";
+import { get as getItem } from "./item";
+import { get as getResource, getResourceWhoDrop } from "./resource";
+import { getResourceTile } from "./map";
+import move from "../api/characters/move";
+import gathering from "../api/characters/gathering";
 
 export const team: Map<string, TeamCharacter> = new Map();
 
@@ -50,6 +57,10 @@ export const loadTeams = async (characters: CharacterToCreate[]) => {
 const createTeamCharacter = (char: Character): TeamCharacter => {
   return {
     name: char.name,
+    position: {
+      x: char.x,
+      y: char.y,
+    },
     status: 'Waiting',
     skin: char.skin,
     skills: {
@@ -95,6 +106,124 @@ const createTeamCharacter = (char: Character): TeamCharacter => {
       },
     }
   }
+}
+
+export const execTask = async () => {
+  const task = taskBus.getNextReadyTask()
+  if (!task) {
+    console.log("ℹ️ Aucune tâche prête à être exécutée.");
+    return;
+  }
+  if (config.debug) {
+    console.log(`🔄 Exécution de la tâche : ${task.name}`);
+  }
+
+  // Récupération du personnage ayant la compétence requise la plus élevée et qui est disponible
+  const obj = task.type === 'craft' ? getItem(task.code) : getResourceWhoDrop(task.code);
+  if (undefined === obj) {
+    console.log(`❌ L'objet ou la ressource ${task.code} n'existe pas.`);
+    return;
+  }
+  const skillName = task.type == 'craft' ? getItem(task.code)?.craft?.skill : getResourceWhoDrop(task.code)?.skill;
+  if (config.debug) {
+    console.log(`🔍 Compétence requise pour la tâche ${task.name} : ${skillName}`);
+  }
+  if (!skillName) {
+    console.log(`❌ La tâche ${task.name} n'a pas de compétence associée.`);
+    return;
+  }
+  const charactersWithSkill = Array.from(team.values()).filter(char => {
+    const skill = char.skills[skillName as keyof TeamCharacter['skills']];
+    return skill && skill.level > 0 && char.status === 'Waiting';
+  });
+  if (config.debug) {
+    console.log(`👥 Personnages disponibles avec la compétence ${skillName} : ${charactersWithSkill.map(c => c.name).join(', ')}`);
+  }
+  
+  if (charactersWithSkill.length === 0) {
+    console.log(`❌ Aucun personnage n'a la compétence requise (${skillName}) pour la tâche : ${task.name}`);
+    return;
+  }
+
+  const bestCharacter = charactersWithSkill.reduce((prev, curr) => {
+    const prevSkill = prev.skills[skillName as keyof TeamCharacter['skills']];
+    const currSkill = curr.skills[skillName as keyof TeamCharacter['skills']];
+    return (prevSkill.level > currSkill.level) ? prev : curr;
+  });
+
+  // Mise à jour du statut du personnage
+  bestCharacter.status = 'Working';
+  if (config.debug) {
+    console.log(`👤 Personnage sélectionné : ${bestCharacter.name} (Niveau ${bestCharacter.skills[skillName as keyof TeamCharacter['skills']].level})`);
+  }
+
+  // Exécution de la tâche en fonction du type
+  try {
+    task.status = 'in-progress';
+    if (task.type === 'craft') {
+      // Simuler la création d'un objet
+      console.log(`🔨 Création de l'objet ${task.name} par ${bestCharacter.name}`);
+      // Ici, vous pouvez ajouter la logique pour créer l'objet
+    } else if (task.type === 'gather') {
+      const res = await gather(bestCharacter.name, obj.code);
+      bestCharacter.skills[skillName as keyof TeamCharacter['skills']].xp = res.character[`${skillName}_xp`];
+      bestCharacter.skills[skillName as keyof TeamCharacter['skills']].level = res.character[`${skillName}_level`];
+      bestCharacter.skills[skillName as keyof TeamCharacter['skills']].max_xp = res.character[`${skillName}_max_xp`];
+      if (config.debug) {
+        console.log(`ℹ️ Compétences mises à jour pour ${bestCharacter.name}`);  
+        debugCharacter(bestCharacter.name);
+      }
+    }
+
+    // Marquer la tâche comme terminée
+    taskBus.remove(task.id);
+    console.log(`✅ Tâche ${task.name} terminée par ${bestCharacter.name}`);
+  }
+  catch (error) {
+    console.error(`❌ Erreur lors de l'exécution de la tâche ${task.name} :`, error);
+  }
+  finally {
+    bestCharacter.status = 'Waiting'; // Remettre le personnage en attente
+  }
+}
+
+const gather = async (characterName: string, resourceCode: string): Promise<SkillDataSchema> => {
+  const character = team.get(characterName);
+  if (!character) {
+    throw new Error(`❌ Le personnage ${characterName} n'existe pas dans l'équipe.`);
+  }
+  const resource = getResource(resourceCode);
+  if (!resource) {
+    throw new Error(`❌ La ressource ${resourceCode} n'existe pas.`);
+  }
+
+  console.log(`🌿 Collecte de ressources pour ${resource.name} par ${characterName}`);
+  // Récupération de l'emplacement de la ressource
+  const tile = getResourceTile(resourceCode)
+  if (!tile) {
+    console.log();
+    throw new Error(`❌ Aucune tuile trouvée pour la ressource ${resourceCode}`);
+  }
+  if (config.debug) {
+    console.log(`📍 Emplacement de la ressource : (${tile.x}, ${tile.y})`);
+  }
+  // Déplacement du personnage vers la ressource
+  if (character.position.x === tile.x && character.position.y === tile.y) {
+    if (config.debug) {
+      console.log(`✅ ${characterName} est déjà sur la tuile de la ressource.`);
+    }
+  } else {
+    if (config.debug) {
+      console.log(`🚶‍♂️ Déplacement de ${characterName} vers la tuile de la ressource...`);
+    }
+    await move(characterName, tile);
+  }
+  // Récupération de la ressource
+  if (config.debug) {
+    console.log(`🔄 Démarrage de la collecte de ${resource.name}...`);
+  }
+  const res = await gathering(characterName);
+  return res;
 }
 
 const debugCharacter = (name: string) => {

@@ -3,11 +3,13 @@ config();
 
 import { delay } from './utils/time';
 import { loadItems } from './store/item';
-import { loadTeams } from './store/team';
+import { loadTeams, execTask } from './store/team';
 import { CharacterToCreate } from './types/team';
 import { loadMap } from './store/map';
 import { loadMonsters } from './store/monster';
 import { loadResources } from './store/resource';
+import taskBus from './store/taskBus';
+import { Task } from './entity/task';
 
 const characters: CharacterToCreate[] = [
   {name: 'Ares', skin: 'men1'},
@@ -25,12 +27,19 @@ async function main() {
   await loadTeams(characters)
   console.log(`✅ Initialisation terminée`)
   // Début de la boucle de jeu
-  const inGame = false
+  const inGame = true
+  taskBus.add(new Task({
+    name: 'Récupération de bois',
+    type: 'gather',
+    code: 'ash_wood',
+    quantity: 1
+  }));
+  console.log(`🎮 Début de la boucle de jeu`)
   while (inGame) {
     // Recherche des objets a crafter
-
+    execTask();
     // Temporisation
-    await delay(200)
+    await delay(2000)
   }
 }
 
