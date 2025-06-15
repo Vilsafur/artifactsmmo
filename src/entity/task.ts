@@ -6,8 +6,10 @@ export class Task {
   id: string;
   name: string;
   code: string;
+  quantity: number;
   dependencies: Set<string>;
   dependents: Set<string> = new Set();
+  isDependencyFor?: string;
   status: TaskStatus;
   type: TaskType;
 
@@ -16,6 +18,8 @@ export class Task {
     this.name = def.name;
     this.type = def.type;
     this.code = def.code;
+    this.quantity = def.quantity;
+    this.isDependencyFor = def.isDependencyFor;
 
     this.dependencies = new Set();
     const dependencies = getItemDependency(def.code);

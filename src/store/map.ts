@@ -22,3 +22,11 @@ export const getResourceTile = (resourceCode: string): Tile | undefined => {
   console.log(`⚠️ Aucune tuile trouvée pour la ressource ${resourceCode}`)
   return undefined
 }
+
+export const getBankTile = (): Tile => {
+  const tile = Array.from(map.values()).find(tile => tile.content?.type === 'bank');
+  if (!tile) {
+    throw new Error('Aucune tuile de banque trouvée dans la carte');
+  }
+  return tile;
+}

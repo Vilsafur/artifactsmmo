@@ -1,5 +1,4 @@
 import create from "../api/characters/create";
-import get from "../api/characters/get";
 import list from "../api/characters/list";
 import { Character, SkillDataSchema } from "../api/characters/type";
 import config from "../config";
@@ -8,8 +7,10 @@ import taskBus from "./taskBus";
 import { get as getItem } from "./item";
 import { get as getResource, getResourceWhoDrop } from "./resource";
 import { getResourceTile } from "./map";
-import move from "../api/characters/move";
+import move, { moveToBank } from "../api/characters/move";
 import gathering from "../api/characters/gathering";
+import crafting from "../api/characters/crafting";
+import depositToBank from "../api/characters/depositToBank";
 
 export const team: Map<string, TeamCharacter> = new Map();
 
@@ -111,7 +112,6 @@ const createTeamCharacter = (char: Character): TeamCharacter => {
 export const execTask = async () => {
   const task = taskBus.getNextReadyTask()
   if (!task) {
-    console.log("ℹ️ Aucune tâche prête à être exécutée.");
     return;
   }
   if (config.debug) {
@@ -161,17 +161,25 @@ export const execTask = async () => {
   try {
     task.status = 'in-progress';
     if (task.type === 'craft') {
-      // Simuler la création d'un objet
-      console.log(`🔨 Création de l'objet ${task.name} par ${bestCharacter.name}`);
-      // Ici, vous pouvez ajouter la logique pour créer l'objet
+      const res = await craft(bestCharacter.name, obj.code, task.quantity);
     } else if (task.type === 'gather') {
-      const res = await gather(bestCharacter.name, obj.code);
+      const res = await gather(bestCharacter.name, obj.code, task.quantity);
       bestCharacter.skills[skillName as keyof TeamCharacter['skills']].xp = res.character[`${skillName}_xp`];
       bestCharacter.skills[skillName as keyof TeamCharacter['skills']].level = res.character[`${skillName}_level`];
       bestCharacter.skills[skillName as keyof TeamCharacter['skills']].max_xp = res.character[`${skillName}_max_xp`];
       if (config.debug) {
         console.log(`ℹ️ Compétences mises à jour pour ${bestCharacter.name}`);  
         debugCharacter(bestCharacter.name);
+      }
+  
+      // Déplacement du personnage vers la banque
+      if (config.debug) {
+        console.log(`🚶‍♂️ Déplacement de ${bestCharacter.name} vers la banque pour déposer les ressources...`);
+      }
+      await moveToBank(bestCharacter.name);
+      await depositToBank(bestCharacter.name, task.code, task.quantity);
+      if (config.debug) {
+        console.log(`🏦 Dépôt de ${task.quantity} ${task.code} dans la banque.`);
       }
     }
 
@@ -187,7 +195,7 @@ export const execTask = async () => {
   }
 }
 
-const gather = async (characterName: string, resourceCode: string): Promise<SkillDataSchema> => {
+const gather = async (characterName: string, resourceCode: string, quantity: number): Promise<SkillDataSchema> => {
   const character = team.get(characterName);
   if (!character) {
     throw new Error(`❌ Le personnage ${characterName} n'existe pas dans l'équipe.`);
@@ -222,7 +230,56 @@ const gather = async (characterName: string, resourceCode: string): Promise<Skil
   if (config.debug) {
     console.log(`🔄 Démarrage de la collecte de ${resource.name}...`);
   }
-  const res = await gathering(characterName);
+  let needed = quantity;
+  // récupération de la ressource tant que la quantité n'est pas atteinte
+  let res: SkillDataSchema
+  do {
+    if (config.debug) {
+      console.log(`🔄 Collecte de ${resource.name} en cours... (${needed} restant)`);
+    }
+    res = await gathering(characterName);
+    needed--;
+  } while (needed > 0)
+
+  return res;
+}
+
+const craft = async (characterName: string, itemCode: string, quantity: number): Promise<SkillDataSchema> => {
+  const character = team.get(characterName);
+  if (!character) {
+    throw new Error(`❌ Le personnage ${characterName} n'existe pas dans l'équipe.`);
+  }
+  const item = getItem(itemCode);
+  if (!item) {
+    throw new Error(`❌ L'item' ${itemCode} n'existe pas.`);
+  }
+
+  // Vérification de la possession des ressources nécessaires
+  if (item.craft.items.length > 0)  {
+
+  }
+
+  if (config.debug) {
+    console.log(`🛠️ Fabrication de l'item ${item.name} par ${characterName}`);
+  }
+  // Récupération de l'emplacement du workshop pour fabriquer l'item
+  // Déplacement du personnage vers la ressource
+  // if (character.position.x === tile.x && character.position.y === tile.y) {
+  //   if (config.debug) {
+  //     console.log(`✅ ${characterName} est déjà sur la tuile de la ressource.`);
+  //   }
+  // } else {
+  //   if (config.debug) {
+  //     console.log(`🚶‍♂️ Déplacement de ${characterName} vers la tuile de la ressource...`);
+  //   }
+  //   await move(characterName, tile);
+  // }
+
+  // Fabrication de l'objet
+  if (config.debug) {
+    console.log(`🔄 Démarrage de la fabrication de ${item.name}...`);
+  }
+  const res = await crafting(characterName, item.code, quantity);
   return res;
 }
 
