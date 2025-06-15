@@ -1,4 +1,5 @@
 import type { SkillName, Skin } from "../api/characters/type";
+import { SimpleItem } from "../api/items/type";
 
 export interface CharacterToCreate {
   name: string;
@@ -30,4 +31,5 @@ export interface TeamCharacter {
     x: number;
     y: number;
   };
+  inventory: SimpleItem[]
 }

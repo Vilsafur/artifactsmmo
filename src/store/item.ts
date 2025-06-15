@@ -26,6 +26,14 @@ export const isItem = (itemCode: string): boolean => {
   return items.has(itemCode)
 }
 
+export const isCraftable = (itemCode: string): boolean => {
+  const item = items.get(itemCode)
+  if (!item) {
+    throw new Error(`❌ L'objet ${itemCode} n'existe pas`)
+  }
+  return item.craft !== undefined && item.craft !== null
+}
+
 export const getItemDependency = (itemCode: string): SimpleItem[] => {
   const item = items.get(itemCode)
   if (!item) {
@@ -41,5 +49,5 @@ export const getQuantityByCraft = (itemCode: string): number => {
     console.log(`⚠️ L'objet ${itemCode} n'existe pas`)
     return 0
   }
-  return item.craft.quantity
+  return item.craft?.quantity ?? 1
 }

@@ -10,6 +10,7 @@ import { loadMonsters } from './store/monster';
 import { loadResources } from './store/resource';
 import taskBus from './store/taskBus';
 import { Task } from './entity/task';
+import { loadBankItems } from './store/bank';
 
 const characters: CharacterToCreate[] = [
   {name: 'Ares', skin: 'men1'},
@@ -24,14 +25,15 @@ async function main() {
   await loadResources()
   await loadMap()
   await loadMonsters()
+  await loadBankItems()
   await loadTeams(characters)
   console.log(`✅ Initialisation terminée`)
   // Début de la boucle de jeu
   const inGame = true
   taskBus.add(new Task({
-    name: 'Récupération de bois',
-    type: 'gather',
-    code: 'ash_wood',
+    name: `Fabrication d'une planche en bois`,
+    type: 'craft',
+    code: 'ash_plank',
     quantity: 1
   }));
   console.log(`🎮 Début de la boucle de jeu`)

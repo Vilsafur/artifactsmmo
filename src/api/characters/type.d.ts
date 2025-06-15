@@ -1,9 +1,16 @@
-import { SimpleItem } from "../items/type";
+import { Item, SimpleItem } from "../items/type";
 import { Tile } from "../map/type";
 import { cooldown } from "../types";
 
 export type Skin = 'men1' | 'men2' | 'men3' | 'women1' | 'women2' | 'women3'
 export type SkillName = 'mining' | 'woodcutting' | 'fishing' | 'weaponcrafting' | 'gearcrafting' | 'jewelrycrafting' | 'cooking' | 'alchemy'
+
+interface InventorySlot {
+  slot: number;
+  code: string;
+  quantity: number;
+}
+
 // Typage d'un personnage
 export interface Character {
   name: string;
@@ -34,6 +41,7 @@ export interface Character {
   alchemy_max_xp: number;
   x: number;
   y: number;
+  inventory: InventorySlot[]
 }
 
 export interface CharacterMovementDataSchema {
@@ -50,4 +58,11 @@ export interface SkillDataSchema {
   cooldown: cooldown;
   character: Character;
   details: SkillInfo;
+}
+
+export interface BankItemTransactionSchema {
+  cooldown: cooldown;
+  character: Character;
+  item: Item[];
+  bank: SimpleItem[];
 }

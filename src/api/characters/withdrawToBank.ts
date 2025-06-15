@@ -3,8 +3,8 @@ import { api } from '../client';
 import type { ApiResponse } from '../types';
 import type { BankItemTransactionSchema } from './type';
 
-export default async function depositToBank(name: string, code: string, quantity: number): Promise<BankItemTransactionSchema> {
-  const res = await api.post<ApiResponse<BankItemTransactionSchema>>(`/my/${name}/action/bank/deposit`, {
+export default async function withdrawToBank(name: string, code: string, quantity: number): Promise<BankItemTransactionSchema> {
+  const res = await api.post<ApiResponse<BankItemTransactionSchema>>(`/my/${name}/action/bank/withdraw`, {
     code,
     quantity,
   });
