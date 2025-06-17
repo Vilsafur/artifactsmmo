@@ -11,6 +11,7 @@ import gathering from "../api/characters/gathering";
 import crafting from "../api/characters/crafting";
 import { add as addToBank, has as hasInBank, howHasInBank, retrive as retriveInBank } from "./bank";
 import { Task } from "../entity/task";
+import deleteCharacter from "../api/characters/delete";
 
 export const team: Map<string, TeamCharacter> = new Map();
 
@@ -352,4 +353,21 @@ const getBestCharacterForSkill = (skillName: keyof TeamCharacter['skills'], leve
     console.log(`🔍 Meilleur personnage pour ${skillName} (Niveau ${level}) : ${best.name} (Somme des niveaux : ${bestSum})`);
     return best;
   });
+}
+
+export const clear = async () => {
+  console.log(`🧹 Effacement de l'équipe...`);
+  const existing = await list();
+  const existingName = existing.map(c => c.name)
+
+  for (const name of existingName) {
+    try {
+      console.log(`🗑️ Suppression de ${name}...`);
+      await deleteCharacter(name); // Utilisation de l'API pour supprimer le personnage
+      console.log(`✅ ${name} supprimé.`);
+    } catch (err: any) {
+      console.error(`❌ Erreur lors de la suppression de ${name} :`, err.response?.data || err.message);
+    }
+  }
+  console.log(`ℹ️ Effacement de l'équipe terminé`);
 }
