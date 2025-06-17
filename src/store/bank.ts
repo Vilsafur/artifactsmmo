@@ -3,7 +3,6 @@ import depositToBank from "../api/characters/depositToBank";
 import { moveToBank } from "../api/characters/move";
 import withdrawToBank from "../api/characters/withdrawToBank";
 import { SimpleItem } from "../api/items/type";
-import config from "../config";
 
 export const items: Map<string, SimpleItem> = new Map()
 
@@ -26,18 +25,24 @@ export const add = async (characterName: string, code: string, quantity: number)
     code,
     quantity: newQuantity
   });
-  if (config.debug) {
-    console.log(`🏦 Dépôt de ${quantity} ${code} dans la banque.`);
-    console.log(`🏦 Nouvelle quantité : ${newQuantity}`);
-  }
+  console.log(`🏦 Dépôt de ${quantity} ${code} dans la banque.`);
+  console.log(`🏦 Nouvelle quantité : ${newQuantity}`);
 }
 
-export const has = (code: string, quantity: number): boolean => {
+export const has = (code: string, quantity: number = 1): boolean => {
   const item = items.get(code);
   if (!item) {
     return false;
   }
   return item.quantity >= quantity;
+}
+
+export const howHasInBank = (code: string): number => {
+  const item = items.get(code);
+  if (!item) {
+    return 0;
+  }
+  return item.quantity;
 }
 
 export const retrive = async (characterName: string, code: string, quantity: number) => {
@@ -55,8 +60,6 @@ export const retrive = async (characterName: string, code: string, quantity: num
     code,
     quantity: newQuantity
   });
-  if (config.debug) {
-    console.log(`🏦 Retrait de ${quantity} ${code} de la banque.`);
-    console.log(`🏦 Nouvelle quantité : ${newQuantity}`);
-  }
+  console.log(`🏦 Retrait de ${quantity} ${code} de la banque.`);
+  console.log(`🏦 Nouvelle quantité : ${newQuantity}`);
 }
