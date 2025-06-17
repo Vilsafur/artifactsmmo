@@ -145,6 +145,15 @@ export const execTask = async () => {
     task.status = 'in-progress';
     if (task.type === 'craft') {
       const res = await craft(bestCharacter.name, obj.code, task.quantity, task);
+      bestCharacter.skills[skillName as keyof TeamCharacter['skills']].xp = res.character[`${skillName}_xp`];
+      bestCharacter.skills[skillName as keyof TeamCharacter['skills']].level = res.character[`${skillName}_level`];
+      bestCharacter.skills[skillName as keyof TeamCharacter['skills']].max_xp = res.character[`${skillName}_max_xp`];
+      console.log(`ℹ️ Compétences mises à jour pour ${bestCharacter.name}`);  
+      debugCharacter(bestCharacter.name);
+      
+      // Déplacement du personnage vers la banque
+      console.log(`🚶‍♂️ Déplacement de ${bestCharacter.name} vers la banque pour déposer les ressources...`);
+      await addToBank(bestCharacter.name, task.code, task.quantity);
     } else if (task.type === 'gather') {
       const res = await gather(bestCharacter.name, obj.code, task.quantity);
       bestCharacter.skills[skillName as keyof TeamCharacter['skills']].xp = res.character[`${skillName}_xp`];
@@ -231,6 +240,7 @@ const craft = async (characterName: string, itemCode: string, quantity: number, 
       const characterResource = character.inventory.find(i => i.code === itemNeeded.code);
       // Vérification de la disponibilité de la ressource dans l'inventaire du personnage
       if (characterResource) {
+        console.log(`🔍 Utilisation de ${characterResource.quantity} ${obj.name} de l'inventaire de ${characterName}`);
         quantityNeeded -= characterResource.quantity;
         if (quantityNeeded <= 0) {
           console.log(`✅ ${obj.name} est déjà présent dans l'inventaire de ${characterName} (${characterResource.quantity}/${itemNeeded.quantity})`);
