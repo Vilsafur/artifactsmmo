@@ -3,7 +3,7 @@ import list from "../api/characters/list";
 import { Character, SkillDataSchema } from "../api/characters/type";
 import type { CharacterToCreate, TeamCharacter } from "../types/team";
 import taskBus from "./taskBus";
-import { get as getItem } from "./item";
+import { get as getItem, isCraftable } from "./item";
 import { get as getResource, getResourceWhoDrop } from "./resource";
 import { getResourceTile, getWorkshopTile } from "./map";
 import move from "../api/characters/move";
@@ -123,27 +123,18 @@ export const execTask = async () => {
     return;
   }
   const skillName = task.type == 'craft' ? getItem(task.code)?.craft?.skill : getResourceWhoDrop(task.code)?.skill;
+  const skillLevel = (task.type == 'craft' ? getItem(task.code)?.craft?.level : getResourceWhoDrop(task.code)?.level) ?? 1;
   console.log(`🔍 Compétence requise pour la tâche ${task.name} : ${skillName}`);
   if (!skillName) {
     console.log(`❌ La tâche ${task.name} n'a pas de compétence associée.`);
     return;
   }
-  const charactersWithSkill = Array.from(team.values()).filter(char => {
-    const skill = char.skills[skillName as keyof TeamCharacter['skills']];
-    return skill && skill.level > 0 && char.status === 'Waiting';
-  });
-  console.log(`👥 Personnages disponibles avec la compétence ${skillName} : ${charactersWithSkill.map(c => c.name).join(', ')}`);
-  
-  if (charactersWithSkill.length === 0) {
-    console.log(`❌ Aucun personnage n'a la compétence requise (${skillName}) pour la tâche : ${task.name}`);
+
+  const bestCharacter = getBestCharacterForSkill(skillName, skillLevel);
+  if (!bestCharacter) {
+    console.log(`❌ Aucun personnage disponible avec la compétence ${skillName} (Niveau ${skillLevel})`);
     return;
   }
-
-  const bestCharacter = charactersWithSkill.reduce((prev, curr) => {
-    const prevSkill = prev.skills[skillName as keyof TeamCharacter['skills']];
-    const currSkill = curr.skills[skillName as keyof TeamCharacter['skills']];
-    return (prevSkill.level > currSkill.level) ? prev : curr;
-  });
 
   // Mise à jour du statut du personnage
   bestCharacter.status = 'Working';
@@ -164,12 +155,12 @@ export const execTask = async () => {
       
       // Déplacement du personnage vers la banque
       console.log(`🚶‍♂️ Déplacement de ${bestCharacter.name} vers la banque pour déposer les ressources...`);
-      addToBank(bestCharacter.name, task.code, task.quantity);
+      await addToBank(bestCharacter.name, task.code, task.quantity);
     }
 
     // Marquer la tâche comme terminée
-    taskBus.remove(task.id);
     console.log(`✅ Tâche ${task.name} terminée par ${bestCharacter.name}`);
+    taskBus.remove(task.id);
   }
   catch (error) {
     console.error(`❌ Erreur lors de l'exécution de la tâche ${task.name} :`, error);
@@ -246,6 +237,7 @@ const craft = async (characterName: string, itemCode: string, quantity: number, 
           continue;
         }
       }
+      console.log(`❌ ${characterName} n'a pas assez de ${obj.name} dans son inventaire (${characterResource?.quantity ?? 0}/${itemNeeded.quantity})`);
       // Vérification de la disponibilité de la ressource à la banque
       console.log(`🔍 Vérification de la disponibilité de ${obj.name} dans la banque...`);
       const availableInBank = howHasInBank(itemNeeded.code);
@@ -262,15 +254,17 @@ const craft = async (characterName: string, itemCode: string, quantity: number, 
           continue;
         }
       }
+      const typeTask = isCraftable(itemNeeded.code) ? 'craft' : 'gather';
       const newTask = new Task({
-        name: `Collecte de ${obj.name} pour ${characterName}`,
-        type: 'gather',
+        name: `${typeTask === 'craft' ? 'Fabrication' : 'Collecte'} de ${obj.name} pour ${characterName}`,
+        type: typeTask,
         code: itemNeeded.code,
         quantity: quantityNeeded,
         isDependencyFor: task.id,
       });
       task.dependencies.add(newTask.id);
       taskBus.add(newTask);
+      console.log(`📝 Tâche ajoutée pour ${typeTask === 'craft' ? 'fabriquer' : 'collecter'} ${quantityNeeded} ${obj.name} pour ${characterName}`);
       
       console.log(`❌ ${characterName} n'a pas assez de ${obj.name} (${characterResource?.quantity ?? 0}/${quantityNeeded})`);
       console.log(`📝 Tâche ajoutée pour collecter ${quantityNeeded} ${obj.name}`);
@@ -322,4 +316,30 @@ const debugCharacter = (name: string) => {
   }, {} as Record<string, { Niveau: number; XP: string; Progression: string }>);
 
   console.table(skillTable);
+}
+
+const getBestCharacterForSkill = (skillName: keyof TeamCharacter['skills'], level: number): TeamCharacter | undefined => {
+  return Array.from(team.values()).reduce((best, current) => {
+    const bestMax = best ? best.skills[skillName].level : -Infinity;
+    const currMax = current.skills[skillName].level;
+    console.log(`🔍 Vérification de ${current.name} pour ${skillName} (Niveau ${level}) : Niveau actuel ${currMax}, Meilleur niveau ${bestMax}`);
+    if (currMax > bestMax) {
+      console.log(`🔍 Meilleur personnage pour ${skillName} (Niveau ${level}) : ${current.name} (Niveau ${currMax})`);
+      return current;
+    }
+    if (currMax < bestMax) {
+      console.log(`🔍 Meilleur personnage pour ${skillName} (Niveau ${level}) : ${best.name} (Niveau ${bestMax})`);
+      return best;
+    }
+
+    // Même niveau max, comparer la somme des niveaux
+    const bestSum = best ? Object.values(best.skills).reduce((a, b) => a + b.level, 0) : Infinity;
+    const currSum = Object.values(current.skills).reduce((a, b) => a + b.level, 0);
+    if (currSum < bestSum) {
+      console.log(`🔍 Meilleur personnage pour ${skillName} (Niveau ${level}) : ${current.name} (Somme des niveaux : ${currSum})`);
+      return current;
+    }
+    console.log(`🔍 Meilleur personnage pour ${skillName} (Niveau ${level}) : ${best.name} (Somme des niveaux : ${bestSum})`);
+    return best;
+  });
 }

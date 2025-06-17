@@ -31,6 +31,14 @@ export const isCraftable = (itemCode: string): boolean => {
   if (!item) {
     throw new Error(`❌ L'objet ${itemCode} n'existe pas`)
   }
+  const craftable = item.craft !== undefined && item.craft !== null
+  if (craftable) {
+    console.log(`✅ L'objet ${itemCode} est craftable`)
+    console.log(`🛠️ Détails du craft :`, item.craft)
+  } else {
+    console.log(`❌ L'objet ${itemCode} n'est pas craftable`)
+  }
+
   return item.craft !== undefined && item.craft !== null
 }
 

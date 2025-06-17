@@ -31,9 +31,9 @@ async function main() {
   // Début de la boucle de jeu
   const inGame = true
   taskBus.add(new Task({
-    name: `Fabrication d'une planche en bois`,
+    name: `Fabrication d'un casque en bronze`,
     type: 'craft',
-    code: 'ash_plank',
+    code: 'copper_helmet',
     quantity: 1
   }));
   console.log(`🎮 Début de la boucle de jeu`)

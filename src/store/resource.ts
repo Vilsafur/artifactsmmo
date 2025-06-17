@@ -25,8 +25,10 @@ export const get = (resourceCode: string): Resource | undefined => {
 export const getResourceWhoDrop = (itemCode: string): Resource | undefined => {
   for (const resource of resources.values()) {
     if (resource.drops?.find(drop => drop.code === itemCode)) {
+      console.log(`ℹ️ La ressource ${resource.code} drop l'item ${itemCode}`)
       return resource
     }
   }
+  console.log(`⚠️ Aucune ressource ne drop l'item ${itemCode}`)
   return undefined
 }
