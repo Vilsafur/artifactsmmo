@@ -1,3 +1,4 @@
+import { SkillName } from "../api/characters/type";
 import getAll from "../api/map";
 import { Tile } from "../api/map/type";
 
@@ -27,6 +28,14 @@ export const getBankTile = (): Tile => {
   const tile = Array.from(map.values()).find(tile => tile.content?.type === 'bank');
   if (!tile) {
     throw new Error('Aucune tuile de banque trouvée dans la carte');
+  }
+  return tile;
+}
+
+export const getWorkshopTile = (skill: SkillName): Tile => {
+  const tile = Array.from(map.values()).find(tile => tile.content?.type === 'workshop' && tile.content?.code === skill);
+  if (!tile) {
+    throw new Error('Aucune tuile d\'atelier trouvée dans la carte');
   }
   return tile;
 }

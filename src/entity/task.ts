@@ -1,5 +1,3 @@
-import { getItemDependency, getQuantityByCraft, isCraftable, isItem } from "../store/item";
-import taskBus from "../store/taskBus";
 import type { TaskDefinition, TaskStatus, TaskType } from "../types/task";
 
 export class Task {
@@ -22,22 +20,6 @@ export class Task {
     this.isDependencyFor = def.isDependencyFor;
 
     this.dependencies = new Set();
-    const dependencies = getItemDependency(def.code);
-    for (const dep of dependencies) {
-      const depTask = new Task({
-        name: dep.code,
-        type: isCraftable(dep.code) ? 'craft' : 'gather',
-        code: dep.code,
-        quantity: Math.ceil(
-          (dep.quantity * def.quantity) /
-          (isCraftable(dep.code) ? getQuantityByCraft(dep.code) : 1)
-        ),
-        isDependencyFor: this.id
-      });
-      console.log(`🔗 Dépendance ajoutée: ${depTask.name} (${depTask.code}) pour ${this.name} (${this.code}, type: ${depTask.type})`);
-      this.dependencies.add(depTask.id);
-      taskBus.add(depTask);
-    }
 
     this.status =  this.dependencies.size > 0 ? 'blocked' : 'ready';
   }
