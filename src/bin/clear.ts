@@ -1,10 +1,11 @@
-import { config } from 'dotenv';
+import { config } from "dotenv";
+
 config();
 
-import { clear } from '../store/team';
+import { clear } from "../store/team";
 
 async function main() {
-  await clear();
+	await clear();
 }
 
 main();

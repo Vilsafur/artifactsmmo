@@ -1,14 +1,21 @@
-import { delay } from '../../utils/time';
-import { api } from '../client';
-import type { ApiResponse } from '../types';
-import type { BankItemTransactionSchema } from './type';
+import { delay } from "../../utils/time";
+import { api } from "../client";
+import type { ApiResponse } from "../types";
+import type { BankItemTransactionSchema } from "./type";
 
-export default async function depositToBank(name: string, code: string, quantity: number): Promise<BankItemTransactionSchema> {
-  const res = await api.post<ApiResponse<BankItemTransactionSchema>>(`/my/${name}/action/bank/deposit`, {
-    code,
-    quantity,
-  });
-  await delay(res.data.data.cooldown.remaining_seconds * 1000);
+export default async function depositToBank(
+	name: string,
+	code: string,
+	quantity: number,
+): Promise<BankItemTransactionSchema> {
+	const res = await api.post<ApiResponse<BankItemTransactionSchema>>(
+		`/my/${name}/action/bank/deposit`,
+		{
+			code,
+			quantity,
+		},
+	);
+	await delay(res.data.data.cooldown.remaining_seconds * 1000);
 
-  return res.data.data;
+	return res.data.data;
 }
