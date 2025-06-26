@@ -19,7 +19,7 @@ const characters: CharacterToCreate[] = [
 ];
 
 const minimalInBank: {[code: string]: number} = {
-  cooked_gudgeon: 5,
+  cooked_gudgeon: 10,
   apple: 5,
   ash_wood: 20,
   copper: 5,

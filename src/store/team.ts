@@ -449,6 +449,23 @@ const getBestCharacterForSkill = (
 			return best;
 		}
 
+		// Vérification de l'expérience si les niveaux sont égaux
+		const bestXp = best ? best.skills[skillName].xp	: -Infinity;
+		const currXp = current.skills[skillName].xp;
+
+		if (currXp > bestXp) {
+			console.log(
+				`🔍 Meilleur personnage pour ${skillName} (Niveau ${level}) : ${current.name} (Niveau ${currXp})`,
+			);
+			return current;
+		}
+		if (currXp < bestXp) {
+			console.log(
+				`🔍 Meilleur personnage pour ${skillName} (Niveau ${level}) : ${best.name} (Niveau ${bestXp})`,
+			);
+			return best;
+		}
+
 		// Même niveau max, comparer la somme des niveaux
 		const bestSum = best
 			? Object.values(best.skills).reduce((a, b) => a + b.level, 0)
