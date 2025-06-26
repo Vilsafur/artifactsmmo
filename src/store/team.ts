@@ -148,6 +148,7 @@ export const execTask = async () => {
 		console.log(
 			`❌ Aucun personnage disponible avec la compétence ${skillName} (Niveau ${skillLevel})`,
 		);
+		task.status = "blocked";
 		return;
 	}
 
@@ -419,7 +420,17 @@ const getBestCharacterForSkill = (
 	skillName: keyof TeamCharacter["skills"],
 	level: number,
 ): TeamCharacter | undefined => {
-	return Array.from(team.values()).reduce((best, current) => {
+	const availableCharacters = Array.from(team.values()).filter(
+		(char) => char.skills[skillName].level >= level && char.status === "Waiting",
+	);
+	if (availableCharacters.length === 0) {
+		console.log(
+			`❌ Aucun personnage disponible avec la compétence ${skillName} (Niveau ${level})`,
+		);
+		return undefined;
+	}
+
+	return availableCharacters.reduce((best, current) => {
 		const bestMax = best ? best.skills[skillName].level : -Infinity;
 		const currMax = current.skills[skillName].level;
 		console.log(

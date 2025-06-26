@@ -3,6 +3,9 @@ import depositToBank from "../api/characters/depositToBank";
 import { moveToBank } from "../api/characters/move";
 import withdrawToBank from "../api/characters/withdrawToBank";
 import type { SimpleItem } from "../api/items/type";
+import { Task } from "../entity/task";
+import { isCraftable } from "./item";
+import taskBus from "./taskBus";
 
 export const items: Map<string, SimpleItem> = new Map();
 
@@ -71,3 +74,25 @@ export const retrive = async (
 	console.log(`🏦 Retrait de ${quantity} ${code} de la banque.`);
 	console.log(`🏦 Nouvelle quantité : ${newQuantity}`);
 };
+
+export const ensureItemIsInBank = (code: string, quantity: number) => {
+	if (has(code, quantity)) {
+		return
+	}
+	const taskName = `Ajout de ${code} dans la banque`;
+	if (taskBus.hasTask(taskName)) {
+		return;
+	}
+
+	const quantityToAdd = quantity - howHasInBank(code);
+	const typeTask = isCraftable(code) ? "craft" : "gather";
+	taskBus.add(
+		new Task({
+			name: taskName,
+			type: typeTask,
+			code,
+			quantity: quantityToAdd,
+		})
+	);
+	console.log(`🏦 Tâche "${taskName}" ajoutée à la file d'attente.`);
+}

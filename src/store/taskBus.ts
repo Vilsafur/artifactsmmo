@@ -48,6 +48,15 @@ class TaskBus {
 			);
 		}
 	}
+
+	hasTask(taskName: string): boolean {
+		for (const task of this.queue.values()) {
+			if (task.name === taskName) {
+				return true;
+			}
+		}
+		return false;
+	}
 }
 
 export default new TaskBus();
